@@ -18,6 +18,8 @@ import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 
+import java.util.Date;
+
 import edu.stanford.aa122.bebopcontroller.helpers.BebopDrone;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
 
@@ -366,12 +368,12 @@ public class BebopActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBatteryChargeChanged(int batteryPercentage) {
+        public void onBatteryChargeChanged(Date timestamp, int batteryPercentage) {
             mBatteryLabel.setText(String.format("%d%%", batteryPercentage));
         }
 
         @Override
-        public void onPilotingStateChanged(ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
+        public void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
             switch (state) {
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
                     mTakeOffLandBt.setText("Take off");
@@ -391,7 +393,7 @@ public class BebopActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
+        public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
             Log.i(TAG, "Picture has been taken");
         }
 

@@ -32,6 +32,7 @@ import com.parrot.arsdk.arutils.ARUtilsException;
 import com.parrot.arsdk.arutils.ARUtilsManager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED;
@@ -60,16 +61,18 @@ public class BebopDrone {
         /**
          * Called when the battery charge changes
          * Called in the main thread
+         * @param timestamp the phone timestamp for the time this measurement came in
          * @param batteryPercentage the battery remaining (in percent)
          */
-        void onBatteryChargeChanged(int batteryPercentage);
+        void onBatteryChargeChanged(Date timestamp, int batteryPercentage);
 
         /**
          * Called when the piloting state changes
          * Called in the main thread
+         * @param timestamp the phone timestamp for the time this measurement came in
          * @param state the piloting state of the drone
          */
-        void onPilotingStateChanged(ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state);
+        void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state);
 
         /*
         void onPositionChanged(double lat, double lon, double alt);
@@ -86,9 +89,10 @@ public class BebopDrone {
         /**
          * Called when a picture is taken
          * Called on a separate thread
+         * @param timestamp the phone timestamp for the time this measurement came in
          * @param error ERROR_OK if picture has been taken, otherwise describe the error
          */
-        void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error);
+        void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error);
 
         /**
          * Called when the video decoder should be configured
@@ -371,24 +375,24 @@ public class BebopDrone {
         }
     }
 
-    private void notifyBatteryChanged(int battery) {
+    private void notifyBatteryChanged(Date timestamp, int battery) {
         List<Listener> listenersCpy = new ArrayList<>(mListeners);
         for (Listener listener : listenersCpy) {
-            listener.onBatteryChargeChanged(battery);
+            listener.onBatteryChargeChanged(timestamp, battery);
         }
     }
 
-    private void notifyPilotingStateChanged(ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
+    private void notifyPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
         List<Listener> listenersCpy = new ArrayList<>(mListeners);
         for (Listener listener : listenersCpy) {
-            listener.onPilotingStateChanged(state);
+            listener.onPilotingStateChanged(timestamp, state);
         }
     }
 
-    private void notifyPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
+    private void notifyPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
         List<Listener> listenersCpy = new ArrayList<>(mListeners);
         for (Listener listener : listenersCpy) {
-            listener.onPictureTaken(error);
+            listener.onPictureTaken(timestamp, error);
         }
     }
 
@@ -495,6 +499,9 @@ public class BebopDrone {
                 return;
             }
 
+            // get the current timestamp - will be used to know when the event/command was received
+            final Date now = new Date();
+
             switch (commandKey) {
 
                 /* battery update */
@@ -503,7 +510,7 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            notifyBatteryChanged(battery);
+                            notifyBatteryChanged(now, battery);
                         }
                     });
                     break;
@@ -515,7 +522,7 @@ public class BebopDrone {
                         @Override
                         public void run() {
                             mFlyingState = state;
-                            notifyPilotingStateChanged(state);
+                            notifyPilotingStateChanged(now, state);
                         }
                     });
                     break;
@@ -604,7 +611,7 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            notifyPictureTaken(error);
+                            notifyPictureTaken(now, error);
                         }
                     });
                     break;

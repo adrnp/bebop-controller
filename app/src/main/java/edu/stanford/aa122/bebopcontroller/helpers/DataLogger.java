@@ -164,17 +164,17 @@ public class DataLogger implements BebopDrone.Listener {
     }
 
     @Override
-    public void onBatteryChargeChanged(int batteryPercentage) {
+    public void onBatteryChargeChanged(Date timestamp, int batteryPercentage) {
 
     }
 
     @Override
-    public void onPilotingStateChanged(ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
+    public void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
 
     }
 
     @Override
-    public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
+    public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
 
     }
 

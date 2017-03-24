@@ -174,6 +174,26 @@ public class DataLogger implements BebopDrone.Listener {
     }
 
     @Override
+    public void onPositionChanged(Date timestamp, double lat, double lon, double alt) {
+
+    }
+
+    @Override
+    public void onSpeedChanged(Date timestamp, float vx, float vy, float vz) {
+
+    }
+
+    @Override
+    public void onAttitudeChanged(Date timestamp, float roll, float pitch, float yaw) {
+
+    }
+
+    @Override
+    public void onRelativeAltitudeChanged(Date timestamp, double alt) {
+
+    }
+
+    @Override
     public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
 
     }

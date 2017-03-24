@@ -74,15 +74,42 @@ public class BebopDrone {
          */
         void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state);
 
+        /**
+         * Called when the GPS position changes
+         * @param timestamp the phone timestamp for the time this measurement came in
+         * @param lat latitude in decimal degrees
+         * @param lon longitude in decimal degrees
+         * @param alt altitude in meters above sea level
+         */
+        void onPositionChanged(Date timestamp, double lat, double lon, double alt);
+
+        /**
+         * Called when the speed changes
+         * @param timestamp the phone timestamp for the time this measurement came in
+         * @param vx north component velocity [m/s]
+         * @param vy east component velocity [m/s]
+         * @param vz down component velocity [m/s]
+         */
+        void onSpeedChanged(Date timestamp, float vx, float vy, float vz);
+
+        /**
+         * Called when the attitude changes
+         * @param timestamp the phone timestamp for the time this measurement came in
+         * @param roll roll [deg]
+         * @param pitch pitch [deg]
+         * @param yaw yaw [deg]
+         */
+        void onAttitudeChanged(Date timestamp, float roll, float pitch, float yaw);
+
+        /**
+         * Called when the relative altitude changes
+         * @param timestamp the phome timestamp for the time this measurement came in
+         * @param alt the altitude above the home location [m]
+         */
+        void onRelativeAltitudeChanged(Date timestamp, double alt);
+
         /*
-        void onPositionChanged(double lat, double lon, double alt);
-
-        void onSpeedChanged(float vx, float vy, float vz);
-
-        void onAttitudeChanged(float roll, float pitch, float yaw);
-
-        void onRelativeAltitudeChanged(float alt);
-
+        // TODO: probably change this to a waypoint completion broadcast...
         void onRelativeMoveEnded();
         */
 
@@ -389,6 +416,34 @@ public class BebopDrone {
         }
     }
 
+    private void notifyPositionChanged(Date timestamp, double lat, double lon, double alt) {
+        List<Listener> listenersCpy = new ArrayList<>(mListeners);
+        for (Listener listener : listenersCpy) {
+            listener.onPositionChanged(timestamp, lat, lon, alt);
+        }
+    }
+
+    private void notifySpeedChanged(Date timestamp, float vx, float vy, float vz) {
+        List<Listener> listenersCpy = new ArrayList<>(mListeners);
+        for (Listener listener : listenersCpy) {
+            listener.onSpeedChanged(timestamp, vx, vy, vz);
+        }
+    }
+
+    private void notifyAttitudeChanged(Date timestamp, float roll, float pitch, float yaw) {
+        List<Listener> listenersCpy = new ArrayList<>(mListeners);
+        for (Listener listener : listenersCpy) {
+            listener.onAttitudeChanged(timestamp, roll, pitch, yaw);
+        }
+    }
+
+    private void notifyRelativeAltitudeChanged(Date timestamp, double alt) {
+        List<Listener> listenersCpy = new ArrayList<>(mListeners);
+        for (Listener listener : listenersCpy) {
+            listener.onRelativeAltitudeChanged(timestamp, alt);
+        }
+    }
+
     private void notifyPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
         List<Listener> listenersCpy = new ArrayList<>(mListeners);
         for (Listener listener : listenersCpy) {
@@ -536,7 +591,7 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            // TODO: notify position changed
+                            notifyPositionChanged(now, latitude, longitude, altitude);
                         }
                     });
 
@@ -551,7 +606,7 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            // TODO: notify speed changed
+                            notifySpeedChanged(now, speedX, speedY, speedZ);
                         }
                     });
 
@@ -559,14 +614,14 @@ public class BebopDrone {
 
                 /* attitude changed */
                 case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED:
-                    final float roll = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_ROLL)).doubleValue();
-                    final float pitch = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_PITCH)).doubleValue();
-                    final float yaw = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_YAW)).doubleValue();
+                    final float roll = (float) Math.toDegrees((double) args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_ROLL));
+                    final float pitch = (float) Math.toDegrees((double) args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_PITCH));
+                    final float yaw = (float) Math.toDegrees((double) args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_YAW));
 
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            // TODO: notify attitude changed
+                            notifyAttitudeChanged(now, roll, pitch, yaw);
                         }
                     });
 
@@ -579,7 +634,7 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            // TODO: notify relative alt changed
+                            notifyRelativeAltitudeChanged(now, relativeAltitude);
                         }
                     });
 

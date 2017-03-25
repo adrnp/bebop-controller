@@ -1,4 +1,4 @@
-package edu.stanford.aa122.bebopcontroller.helpers;
+package edu.stanford.aa122.bebopcontroller.drone;
 
 import android.content.Context;
 import android.os.Handler;
@@ -35,9 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED;
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_SPEEDCHANGED;
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED;
+import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 
 /**
  * Helper class for handling the interaction with the Bebop Drone.
@@ -50,115 +48,7 @@ public class BebopDrone {
 
     private static final int DEVICE_PORT = 21;
 
-    public interface Listener {
-        /**
-         * Called when the connection to the drone changes
-         * Called in the main thread
-         * @param state the state of the drone
-         */
-        void onDroneConnectionChanged(ARCONTROLLER_DEVICE_STATE_ENUM state);
-
-        /**
-         * Called when the battery charge changes
-         * Called in the main thread
-         * @param timestamp the phone timestamp for the time this measurement came in
-         * @param batteryPercentage the battery remaining (in percent)
-         */
-        void onBatteryChargeChanged(Date timestamp, int batteryPercentage);
-
-        /**
-         * Called when the piloting state changes
-         * Called in the main thread
-         * @param timestamp the phone timestamp for the time this measurement came in
-         * @param state the piloting state of the drone
-         */
-        void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state);
-
-        /**
-         * Called when the GPS position changes
-         * @param timestamp the phone timestamp for the time this measurement came in
-         * @param lat latitude in decimal degrees
-         * @param lon longitude in decimal degrees
-         * @param alt altitude in meters above sea level
-         */
-        void onPositionChanged(Date timestamp, double lat, double lon, double alt);
-
-        /**
-         * Called when the speed changes
-         * @param timestamp the phone timestamp for the time this measurement came in
-         * @param vx north component velocity [m/s]
-         * @param vy east component velocity [m/s]
-         * @param vz down component velocity [m/s]
-         */
-        void onSpeedChanged(Date timestamp, float vx, float vy, float vz);
-
-        /**
-         * Called when the attitude changes
-         * @param timestamp the phone timestamp for the time this measurement came in
-         * @param roll roll [deg]
-         * @param pitch pitch [deg]
-         * @param yaw yaw [deg]
-         */
-        void onAttitudeChanged(Date timestamp, float roll, float pitch, float yaw);
-
-        /**
-         * Called when the relative altitude changes
-         * @param timestamp the phome timestamp for the time this measurement came in
-         * @param alt the altitude above the home location [m]
-         */
-        void onRelativeAltitudeChanged(Date timestamp, double alt);
-
-        /*
-        // TODO: probably change this to a waypoint completion broadcast...
-        void onRelativeMoveEnded();
-        */
-
-        /**
-         * Called when a picture is taken
-         * Called on a separate thread
-         * @param timestamp the phone timestamp for the time this measurement came in
-         * @param error ERROR_OK if picture has been taken, otherwise describe the error
-         */
-        void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error);
-
-        /**
-         * Called when the video decoder should be configured
-         * Called on a separate thread
-         * @param codec the codec to configure the decoder with
-         */
-        void configureDecoder(ARControllerCodec codec);
-
-        /**
-         * Called when a video frame has been received
-         * Called on a separate thread
-         * @param frame the video frame
-         */
-        void onFrameReceived(ARFrame frame);
-
-        /**
-         * Called before medias will be downloaded
-         * Called in the main thread
-         * @param nbMedias the number of medias that will be downloaded
-         */
-        void onMatchingMediasFound(int nbMedias);
-
-        /**
-         * Called each time the progress of a download changes
-         * Called in the main thread
-         * @param mediaName the name of the media
-         * @param progress the progress of its download (from 0 to 100)
-         */
-        void onDownloadProgressed(String mediaName, int progress);
-
-        /**
-         * Called when a media download has ended
-         * Called in the main thread
-         * @param mediaName the name of the media
-         */
-        void onDownloadComplete(String mediaName);
-    }
-
-    private final List<Listener> mListeners;
+    private final List<BebopDroneListener> mListeners;
 
     private final Handler mHandler;
 
@@ -211,18 +101,17 @@ public class BebopDrone {
         }
     }
 
-    public void dispose()
-    {
+    public void dispose() {
         if (mDeviceController != null)
             mDeviceController.dispose();
     }
 
     //region Listener functions
-    public void addListener(Listener listener) {
+    public void addListener(BebopDroneListener listener) {
         mListeners.add(listener);
     }
 
-    public void removeListener(Listener listener) {
+    public void removeListener(BebopDroneListener listener) {
         mListeners.remove(listener);
     }
     //endregion Listener
@@ -231,7 +120,7 @@ public class BebopDrone {
      * Connect to the drone
      * @return true if operation was successful.
      *              Returning true doesn't mean that device is connected.
-     *              You can be informed of the actual connection through {@link Listener#onDroneConnectionChanged}
+     *              You can be informed of the actual connection through {@link BebopDroneListener#onDroneConnectionChanged}
      */
     public boolean connect() {
         boolean success = false;
@@ -248,7 +137,7 @@ public class BebopDrone {
      * Disconnect from the drone
      * @return true if operation was successful.
      *              Returning true doesn't mean that device is disconnected.
-     *              You can be informed of the actual disconnection through {@link Listener#onDroneConnectionChanged}
+     *              You can be informed of the actual disconnection through {@link BebopDroneListener#onDroneConnectionChanged}
      */
     public boolean disconnect() {
         boolean success = false;
@@ -396,92 +285,92 @@ public class BebopDrone {
 
     //region notify listener block
     private void notifyConnectionChanged(ARCONTROLLER_DEVICE_STATE_ENUM state) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onDroneConnectionChanged(state);
         }
     }
 
     private void notifyBatteryChanged(Date timestamp, int battery) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onBatteryChargeChanged(timestamp, battery);
         }
     }
 
     private void notifyPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onPilotingStateChanged(timestamp, state);
         }
     }
 
     private void notifyPositionChanged(Date timestamp, double lat, double lon, double alt) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onPositionChanged(timestamp, lat, lon, alt);
         }
     }
 
     private void notifySpeedChanged(Date timestamp, float vx, float vy, float vz) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onSpeedChanged(timestamp, vx, vy, vz);
         }
     }
 
     private void notifyAttitudeChanged(Date timestamp, float roll, float pitch, float yaw) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onAttitudeChanged(timestamp, roll, pitch, yaw);
         }
     }
 
     private void notifyRelativeAltitudeChanged(Date timestamp, double alt) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onRelativeAltitudeChanged(timestamp, alt);
         }
     }
 
     private void notifyPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onPictureTaken(timestamp, error);
         }
     }
 
     private void notifyConfigureDecoder(ARControllerCodec codec) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.configureDecoder(codec);
         }
     }
 
     private void notifyFrameReceived(ARFrame frame) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onFrameReceived(frame);
         }
     }
 
     private void notifyMatchingMediasFound(int nbMedias) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onMatchingMediasFound(nbMedias);
         }
     }
 
     private void notifyDownloadProgressed(String mediaName, int progress) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onDownloadProgressed(mediaName, progress);
         }
     }
 
     private void notifyDownloadComplete(String mediaName) {
-        List<Listener> listenersCpy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCpy) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
             listener.onDownloadComplete(mediaName);
         }
     }

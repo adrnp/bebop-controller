@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
+import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
+
 /**
  * Helper class for logging all of the important data from the Bebop drone to file.
  *
@@ -27,7 +29,7 @@ import java.util.Locale;
  *
  * @author Adrien Perkins <adrienp@stanford.edu>
  */
-public class DataLogger implements BebopDrone.Listener {
+public class DataLogger implements BebopDroneListener {
 
     /** helpful constants */
     private static final String FILE_PREFIX = "bebop";

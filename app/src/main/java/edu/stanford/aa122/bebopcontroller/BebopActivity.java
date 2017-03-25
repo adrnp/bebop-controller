@@ -21,6 +21,7 @@ import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import java.util.Date;
 
 import edu.stanford.aa122.bebopcontroller.helpers.BebopDrone;
+import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
 
 /**
@@ -44,6 +45,8 @@ public class BebopActivity extends AppCompatActivity {
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
 
+    private DataLogger mDataLogger;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,10 @@ public class BebopActivity extends AppCompatActivity {
         ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.EXTRA_DEVICE_SERVICE);
         mBebopDrone = new BebopDrone(this, service);
         mBebopDrone.addListener(mBebopListener);
+
+        // add the data logging elements
+        mDataLogger = new DataLogger(this);
+        mBebopDrone.addListener(mDataLogger);
 
     }
 
@@ -75,6 +82,9 @@ public class BebopActivity extends AppCompatActivity {
             if (!mBebopDrone.connect()) {
                 finish();
             }
+
+            // start the logger - since at this point we are connected
+            mDataLogger.startNewLog();
         }
     }
 
@@ -98,6 +108,7 @@ public class BebopActivity extends AppCompatActivity {
     public void onDestroy()
     {
         mBebopDrone.dispose();
+        mDataLogger.stopLogging();
         super.onDestroy();
     }
 

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Helper class for logging all of the important data from the Bebop drone to file.
@@ -44,6 +45,9 @@ public class DataLogger implements BebopDrone.Listener {
     private BufferedWriter mFileWriter;
     private File mFile;
 
+    /* date format that will be used for all the logs */
+    private SimpleDateFormat mDateFormatter = new SimpleDateFormat("HH:mm:ss.SSS", Locale.US);
+
     /**
      * Constructor
      * @param context  context containing this instance
@@ -63,7 +67,6 @@ public class DataLogger implements BebopDrone.Listener {
         synchronized (mFileLock) {
 
             // get the directory to place the file
-            // TODO: replace this with something a lot easier... (find on the internet!!)
             File baseDirectory;
             String state = Environment.getExternalStorageState();
             if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -175,17 +178,70 @@ public class DataLogger implements BebopDrone.Listener {
 
     @Override
     public void onPositionChanged(Date timestamp, double lat, double lon, double alt) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
+
+            // format the row of data to add to the file
+            String ts = mDateFormatter.format(timestamp);
+            String newLine = String.format(Locale.US, "POS:%s,%f,%f,%f", ts, lat, lon, alt);
+
+            // add the line to the file
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
 
     }
 
     @Override
     public void onSpeedChanged(Date timestamp, float vx, float vy, float vz) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
+
+            // format the row of data to add to the file
+            String ts = mDateFormatter.format(timestamp);
+            String newLine = String.format(Locale.US, "VEL:%s,%f,%f,%f", ts, vx, vy, vz);
+
+            // add the line to the file
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
 
     }
 
     @Override
     public void onAttitudeChanged(Date timestamp, float roll, float pitch, float yaw) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
 
+            // format the row of data to add to the file
+            String ts = mDateFormatter.format(timestamp);
+            String newLine = String.format(Locale.US, "ATT:%s,%f,%f,%f", ts, roll, pitch, yaw);
+
+            // add the line to the file
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

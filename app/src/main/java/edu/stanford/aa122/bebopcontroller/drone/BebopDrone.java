@@ -1,6 +1,7 @@
 package edu.stanford.aa122.bebopcontroller.drone;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -36,30 +37,59 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.stanford.aa122.bebopcontroller.helpers.AttitudeVector;
+import edu.stanford.aa122.bebopcontroller.helpers.VelocityVector;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 
-import static android.R.attr.direction;
 
 /**
  * Helper class for handling the interaction with the Bebop Drone.
  *
- * Taken from Parrot SDK Samples
+ * Modified from Parrot SDK Samples
+ *
+ * @author Adrien Perkins <adrienp@stanford.edu>
  */
 public class BebopDrone {
 
+    /** tag for debugging */
     private static final String TAG = "BebopDrone";
 
+    /** port number for downloading images */
     private static final int DEVICE_PORT = 21;
 
+    /** list of listeners configured to listener to Bebop events */
     private final List<BebopDroneListener> mListeners;
 
+    /** handler */
     private final Handler mHandler;
 
+    /* Parrot stuff */
     private ARDeviceController mDeviceController;
     private SDCardModule mSDCardModule;
+
+    /** Bebop controller (phone) state */
     private ARCONTROLLER_DEVICE_STATE_ENUM mState;
-    private ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM mFlyingState;
+
+    /** current run id */
+    // TODO: figure out what this is
     private String mCurrentRunId;
+
+    /* current vehicle information */
+
+    /** Bebop state */
+    private ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM mFlyingState;
+
+    /** current Bebop position */
+    private Location mPosition;
+
+    /** current Bebop velocity */
+    private VelocityVector mVelocity;
+
+    /** current Bebop attitude */
+    private AttitudeVector mAttitude;
+
+    /** whether or not Bebop has completed the last relative move command sent */
+    private boolean mFinishedLastCommand = true;
 
     public BebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
 
@@ -169,6 +199,38 @@ public class BebopDrone {
         return mFlyingState;
     }
 
+    /**
+     * Get the current GPS position
+     * @return GPS position as a Location
+     */
+    public Location getPosition() {
+        return mPosition;
+    }
+
+    /**
+     * Get the current velocity
+     * @return NED velocity in m/s
+     */
+    public VelocityVector getVelocity() {
+        return mVelocity;
+    }
+
+    /**
+     * Get the current attitude
+     * @return attitude in degrees
+     */
+    public AttitudeVector getAttitude() {
+        return mAttitude;
+    }
+
+    /**
+     * Determine whether or not Bebop has completed the last command sent to it
+     * @return true if completed the last command sent
+     */
+    public boolean finishedLastCommand() {
+        return mFinishedLastCommand;
+    }
+
     public void takeOff() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendPilotingTakeOff();
@@ -207,6 +269,9 @@ public class BebopDrone {
         // send the command
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendPilotingMoveBy(dx, dy, dz, dpsi);
+
+            // mark the command being in progress
+            mFinishedLastCommand = false;
         }
     }
 
@@ -217,6 +282,10 @@ public class BebopDrone {
     public void flip(ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM direction) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendAnimationsFlip(direction);
+
+            // mark the command being in progress
+            // TODO: determine if there is returned information from the Bebop for when the flip is completed
+            mFinishedLastCommand = false;
         }
     }
 
@@ -507,9 +576,15 @@ public class BebopDrone {
                     final double longitude = (double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_POSITIONCHANGED_LONGITUDE);
                     final double altitude = (double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_POSITIONCHANGED_ALTITUDE);
 
+                    final Location loc = new Location("Bebop");
+                    loc.setLatitude(latitude);
+                    loc.setLongitude(longitude);
+                    loc.setAltitude(altitude);
+
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mPosition = loc;
                             notifyPositionChanged(now, latitude, longitude, altitude);
                         }
                     });
@@ -522,9 +597,12 @@ public class BebopDrone {
                     final float speedY = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_SPEEDCHANGED_SPEEDY)).doubleValue();
                     final float speedZ = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_SPEEDCHANGED_SPEEDZ)).doubleValue();
 
+                    final VelocityVector speed = new VelocityVector(speedX, speedY, speedZ);
+
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mVelocity = speed;
                             notifySpeedChanged(now, speedX, speedY, speedZ);
                         }
                     });
@@ -537,9 +615,12 @@ public class BebopDrone {
                     final float pitch = (float) Math.toDegrees((double) args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_PITCH));
                     final float yaw = (float) Math.toDegrees((double) args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_ATTITUDECHANGED_YAW));
 
+                    final AttitudeVector att = new AttitudeVector(roll, pitch, yaw);
+
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mAttitude = att;
                             notifyAttitudeChanged(now, roll, pitch, yaw);
                         }
                     });
@@ -571,13 +652,13 @@ public class BebopDrone {
                         @Override
                         public void run() {
                             // TODO: notify relative move changed
+
+                            // mark as having just finished a command
+                            mFinishedLastCommand = true;
                         }
                     });
 
                     break;
-
-
-
 
                 /* picture notification */
                 case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED:

@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGEVENT_MOVEBYEND_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
@@ -36,6 +37,8 @@ import java.util.Date;
 import java.util.List;
 
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
+
+import static android.R.attr.direction;
 
 /**
  * Helper class for handling the interaction with the Bebop Drone.
@@ -187,6 +190,33 @@ public class BebopDrone {
     public void takePicture() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendMediaRecordPictureV2();
+        }
+    }
+
+    /**
+     * Move the Bebop drone in the body frame.
+     * @param dx body x translation (front) [m]
+     * @param dy body y translation (right side) [m]
+     * @param dz body z translation (down) [m]
+     * @param dpsi heading change [deg]
+     */
+    public void relativeMove(float dx, float dy, float dz, float dpsi) {
+        // convert from deg to rad
+        dpsi = (float) Math.toRadians((double) dpsi);
+
+        // send the command
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingMoveBy(dx, dy, dz, dpsi);
+        }
+    }
+
+    /**
+     * Command the drone to flip (if there is enough battery).
+     * @param direction direction which the drone should flip
+     */
+    public void flip(ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM direction) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendAnimationsFlip(direction);
         }
     }
 

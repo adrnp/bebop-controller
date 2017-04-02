@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".BebopActivity"
+    android:id="@+id/piloting_view">
+
+    <edu.stanford.aa122.bebopcontroller.view.JoystickView
+        android:id="@+id/joystick_left"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp"
+        app:drawableForward="@drawable/ic_dist_above"
+        app:drawableBackward="@drawable/ic_down"
+        app:drawableLeft="@drawable/ic_rotate_left"
+        app:drawableRight="@drawable/ic_rotate_right"/>
+
+    <edu.stanford.aa122.bebopcontroller.view.JoystickView
+        android:id="@+id/joystick_right"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_centerVertical="true"
+        app:drawableForward="@drawable/ic_forward"
+        app:drawableBackward="@drawable/ic_backward"
+        app:drawableLeft="@drawable/ic_left"
+        app:drawableRight="@drawable/ic_right"/>
+
+</RelativeLayout>

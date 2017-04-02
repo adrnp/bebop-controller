@@ -15,4 +15,6 @@
 
     <color name="selected_tab_color">#AAAAAA</color>
     <color name="unselected_tab_color">#CCCCCC</color>
+
+    <color name="dark_background_transparent">#88000000</color>
 </resources>

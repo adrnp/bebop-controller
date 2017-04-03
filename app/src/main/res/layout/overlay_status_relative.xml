@@ -7,7 +7,7 @@
     android:layout_alignParentBottom="true">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/text_battery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -23,7 +23,7 @@
         android:gravity="center_vertical"/>
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/text_altitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -35,14 +35,14 @@
         android:gravity="center_vertical"/>
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/text_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="19dp"
         android:layout_marginStart="19dp"
-        android:layout_toEndOf="@+id/textView4"
-        android:layout_toRightOf="@+id/textView4"
+        android:layout_toEndOf="@+id/text_altitude"
+        android:layout_toRightOf="@+id/text_altitude"
         android:drawableLeft="@drawable/ic_dist_from"
         android:drawableStart="@drawable/ic_dist_from"
         android:drawablePadding="5dp"

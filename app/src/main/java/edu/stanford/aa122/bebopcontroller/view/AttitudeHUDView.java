@@ -19,7 +19,7 @@ import java.util.Locale;
  *
  * @author Adrien Perkins <adrienp@stanford.edu>
  */
-public class AttitudeIndicator extends View {
+public class AttitudeHUDView extends View {
 
     private static final float INTERNAL_RADIUS = 0.85f;
     private static final float YAW_ARROW_SIZE = 1.2f;
@@ -53,7 +53,7 @@ public class AttitudeIndicator extends View {
      * @param context context
      * @param attrs atributes for the view
      */
-    public AttitudeIndicator(Context context, AttributeSet attrs) {
+    public AttitudeHUDView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initialize();
         setAttitude(-30, 20, 0);

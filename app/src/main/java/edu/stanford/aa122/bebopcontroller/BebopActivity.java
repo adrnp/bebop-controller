@@ -33,9 +33,8 @@ import edu.stanford.aa122.bebopcontroller.controller.ManualController;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
-import edu.stanford.aa122.bebopcontroller.view.AttitudeIndicator;
+import edu.stanford.aa122.bebopcontroller.view.AttitudeHUDView;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
-import edu.stanford.aa122.bebopcontroller.view.JoystickView;
 
 /**
  * Main activity that handles the video display and interaction with the Bebop drone.
@@ -87,7 +86,7 @@ public class BebopActivity extends AppCompatActivity {
     private View viewManualControl;
 
     /** view representing the attitude of the drone */
-    private AttitudeIndicator mAttitudeView;
+    private AttitudeHUDView mAttitudeView;
 
     /** the current location of the phone - potentially only going to be determined once */
     private Location mUserLocation;
@@ -207,7 +206,7 @@ public class BebopActivity extends AppCompatActivity {
         viewManualControl = findViewById(R.id.include_manual_control);
 
         // attitude view
-        mAttitudeView = (AttitudeIndicator) findViewById(R.id.view_attitude);
+        mAttitudeView = (AttitudeHUDView) findViewById(R.id.view_attitude);
 
         // textviews
         tvBattery = (TextView) findViewById(R.id.text_battery);

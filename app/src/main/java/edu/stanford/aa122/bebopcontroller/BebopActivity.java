@@ -32,6 +32,7 @@ import edu.stanford.aa122.bebopcontroller.controller.AdvancedController;
 import edu.stanford.aa122.bebopcontroller.controller.ManualController;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
+import edu.stanford.aa122.bebopcontroller.listener.AdvancedControllerListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.view.AttitudeHUDView;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
@@ -124,13 +125,21 @@ public class BebopActivity extends AppCompatActivity {
         // get a location manager
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        // add the manual controller - for now will always have the manual controller
-        // TODO: should be a framework for deciding which controller to initialize
-
-        // TODO: does this even work??
-        // the possible controllers
+        // the possible controllers - create all of them here
+        // they won't ever be used at the same time, so should be ok to create them all here
         ManualController manualController = new ManualController(mBebopDrone, findViewById(R.id.include_manual_control));
         mAdvancedController = new AdvancedController(mBebopDrone);
+        mAdvancedController.registerControllerListener(new AdvancedControllerListener() {
+            @Override
+            public void onWaypointIndexChanged(int wp) {
+                // TODO: update a view element to display the current waypoint
+            }
+
+            @Override
+            public void onRunningStateChanged(boolean running) {
+                // TODO: update something for this... (probably need to change mode back to manual if done)
+            }
+        });
     }
 
     @Override

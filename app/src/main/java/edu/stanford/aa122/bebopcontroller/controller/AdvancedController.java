@@ -6,6 +6,7 @@ import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
+import edu.stanford.aa122.bebopcontroller.listener.AdvancedControllerListener;
 
 /**
  * Class to handle advanced autonomous control of the Bebop drone.
@@ -25,9 +26,24 @@ public class AdvancedController {
     /** the thread that will be running the control loop */
     private Thread mThread = null;
 
+    /** the registered listener to notify changes through */
+    private AdvancedControllerListener mListener;
+
+    /**
+     * constructor for advanced controller
+     * @param drone BebopDrone that will be controlled
+     */
     public AdvancedController(BebopDrone drone) {
         // TODO: decide if this needs to also be a listener or is there a way to be able to see when a move it done without being a listener
         mBebopDrone = drone;
+    }
+
+    /**
+     * register a listener for this controller information
+     * @param listener listener to register
+     */
+    public void registerControllerListener(AdvancedControllerListener listener) {
+        mListener = listener;
     }
 
     /**
@@ -82,6 +98,11 @@ public class AdvancedController {
 
         @Override
         public void run() {
+
+            // notify loop is now running
+            if (mListener != null) {
+                mListener.onRunningStateChanged(true);
+            }
 
             // timestamp of last loop run - needed for loop being at a specific frequency
             long lastLoopTime = System.currentTimeMillis();
@@ -138,11 +159,21 @@ public class AdvancedController {
                         default:
                             // exit out of the loop
                             finished = true;
+
+                            // notify loop is no longer running
+                            if (mListener != null) {
+                                mListener.onRunningStateChanged(false);
+                            }
                             break;
                     }
 
                     // increment the waypoint index as needed
                     wpIndex++;
+
+                    // notify of waypoint update
+                    if (mListener != null) {
+                        mListener.onWaypointIndexChanged(wpIndex);
+                    }
                 }
 
             }

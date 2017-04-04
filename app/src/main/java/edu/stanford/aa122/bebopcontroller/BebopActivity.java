@@ -11,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -216,7 +217,24 @@ public class BebopActivity extends AppCompatActivity {
         // emergency button
         findViewById(R.id.button_emergency).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mBebopDrone.emergency();
+                // show a dialog to confirm actually wanting to e stop
+                AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                builder.setMessage("this will immediately cut off the motors!")
+                        .setTitle("Are You Sure?")
+                        .setPositiveButton("Terminate", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mBebopDrone.emergency();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // don't do anything here, since don't want to terminate
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 

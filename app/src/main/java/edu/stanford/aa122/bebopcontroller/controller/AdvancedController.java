@@ -7,9 +7,6 @@ import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATE
 
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 
-import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING;
-import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING;
-
 /**
  * Class to handle advanced autonomous control of the Bebop drone.
  *
@@ -25,15 +22,11 @@ public class AdvancedController {
     /** the drone to control */
     private BebopDrone mBebopDrone;
 
-    /** flag for whether or not the main loop should be running */
-    private boolean mRunMission = false;
+    /** the thread that will be running the control loop */
+    private Thread mThread = null;
 
     public AdvancedController(BebopDrone drone) {
         // TODO: decide if this needs to also be a listener or is there a way to be able to see when a move it done without being a listener
-
-        // TODO: use the interrupt style from the JoystickView for the thread being used here
-
-        // TODO: figure out how to run a main loop - something at like 5ish Hz, if that
         mBebopDrone = drone;
     }
 
@@ -41,16 +34,23 @@ public class AdvancedController {
      * trigger the mission to begin
      */
     public void startMission() {
-        mRunMission = true;
-        new Thread(mainLoop).run();
+        // stop an existing thread, if there is one running
+        if (mThread != null && mThread.isAlive()) {
+            mThread.interrupt();
+        }
 
+        // start a new mission
+        mThread = new Thread(mainLoop);
+        mThread.start();
     }
 
     /**
      * trigger the mission to be completed
      */
     public void stopMission() {
-        mRunMission = false;
+        if (mThread != null && mThread.isAlive()) {
+            mThread.interrupt();
+        }
     }
 
 
@@ -89,9 +89,11 @@ public class AdvancedController {
             // waypoint index (example)
             int wpIndex = 0;
 
+            // whether or not done with the autonomous mission
+            boolean finished = false;
 
             // this is the main control loop
-            while (mRunMission) {
+            while (!Thread.interrupted() && !finished) {
 
                 // ensure that the loop runs at the proper rate
                 if ((System.currentTimeMillis() - lastLoopTime) < 1000.0/LOOP_RATE) {
@@ -131,15 +133,11 @@ public class AdvancedController {
                         case 3:
                             // example: land
                             mBebopDrone.land();
-
-                            // mark mission as finished
-                            mRunMission = false;
                             break;
 
                         default:
-                            // TODO: probably want to end the loop here and just hover
-                            // reset back to the beginning
-                            wpIndex = -1;
+                            // exit out of the loop
+                            finished = true;
                             break;
                     }
 

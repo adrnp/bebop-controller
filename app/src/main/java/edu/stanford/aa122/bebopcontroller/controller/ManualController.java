@@ -6,6 +6,7 @@ import android.view.View;
 
 import edu.stanford.aa122.bebopcontroller.R;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
+import edu.stanford.aa122.bebopcontroller.view.JoystickView;
 
 /**
  * Class to handle the manual control of the Bebop drone.
@@ -37,82 +38,29 @@ public class ManualController {
      * Setup the view elements.
      */
     private void setupView() {
-        // add a motion touch listener to each of the motion controls
-        // this listener is responsible for setting the commands for the bebop
-        mView.findViewById(R.id.gazUpBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.gazDownBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.yawLeftBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.yawRightBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.forwardBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.backBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.rollLeftBt).setOnTouchListener(mMotionTouchListener);
-        mView.findViewById(R.id.rollRightBt).setOnTouchListener(mMotionTouchListener);
-    }
+        JoystickView leftJoystick = (JoystickView) mView.findViewById(R.id.joystick_left);
+        leftJoystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
+            @Override
+            public void onControlChanged(int x, int y) {
+                mBebopDrone.setGaz((byte) -y);
+                mBebopDrone.setYaw((byte) x);
+            }
+        });
 
-    /** touch listener that will send the appropriate commands to the bebop for manual motion */
-    private View.OnTouchListener mMotionTouchListener = new View.OnTouchListener() {
-
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-
-            switch (motionEvent.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    view.setPressed(true);
-                    // TODO: add setting to be able adjust the button sensitivity
-                    setCommand(view, 50);
-                    mBebopDrone.setFlag((byte) 1);
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    view.setPressed(false);
-                    setCommand(view, 0);
+        JoystickView rightJoystick = (JoystickView) mView.findViewById(R.id.joystick_right);
+        rightJoystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
+            @Override
+            public void onControlChanged(int x, int y) {
+                // need to tell the drone to listen to roll pitch commands (if present)
+                if (x == 0 && y == 0) {
                     mBebopDrone.setFlag((byte) 0);
-                    break;
-
-                default:
-                    break;
+                } else {
+                    mBebopDrone.setFlag((byte) 1);
+                }
+                mBebopDrone.setPitch((byte) -y);
+                mBebopDrone.setRoll((byte) x);
             }
-
-            return true;
-        }
-
-        private void setCommand(View v, int magnitude) {
-            switch (v.getId()) {
-                case R.id.gazUpBt:
-                    mBebopDrone.setGaz((byte) magnitude);
-                    break;
-
-                case R.id.gazDownBt:
-                    mBebopDrone.setGaz((byte) -magnitude);
-                    break;
-
-                case R.id.yawLeftBt:
-                    mBebopDrone.setYaw((byte) -magnitude);
-                    break;
-
-                case R.id.yawRightBt:
-                    mBebopDrone.setYaw((byte) magnitude);
-                    break;
-
-                case R.id.forwardBt:
-                    mBebopDrone.setPitch((byte) magnitude);
-                    break;
-
-                case R.id.backBt:
-                    mBebopDrone.setPitch((byte) -magnitude);
-                    break;
-
-                case R.id.rollLeftBt:
-                    mBebopDrone.setRoll((byte) -magnitude);
-                    break;
-
-                case R.id.rollRightBt:
-                    mBebopDrone.setRoll((byte) magnitude);
-                    break;
-            }
-        }
-    };
-
-
+        });
+    }
 
 }

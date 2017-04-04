@@ -28,6 +28,8 @@ public class AdvancedController {
     public AdvancedController(BebopDrone drone) {
         // TODO: decide if this needs to also be a listener or is there a way to be able to see when a move it done without being a listener
 
+        // TODO: use the interrupt style from the JoystickView for the thread being used here
+
         // TODO: figure out how to run a main loop - something at like 5ish Hz, if that
         mBebopDrone = drone;
     }

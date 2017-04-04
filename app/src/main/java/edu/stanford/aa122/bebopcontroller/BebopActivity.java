@@ -27,11 +27,14 @@ import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import java.util.Date;
 import java.util.Locale;
 
+import edu.stanford.aa122.bebopcontroller.controller.AdvancedController;
 import edu.stanford.aa122.bebopcontroller.controller.ManualController;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
+import edu.stanford.aa122.bebopcontroller.view.AttitudeIndicator;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
+import edu.stanford.aa122.bebopcontroller.view.JoystickView;
 
 /**
  * Main activity that handles the video display and interaction with the Bebop drone.
@@ -82,6 +85,9 @@ public class BebopActivity extends AppCompatActivity {
     /** view for the manual control elements */
     private View viewManualControl;
 
+    /** view representing the attitude of the drone */
+    private AttitudeIndicator mAttitudeView;
+
     /** the current location of the phone - potentially only going to be determined once */
     private Location mUserLocation;
 
@@ -94,6 +100,8 @@ public class BebopActivity extends AppCompatActivity {
 
     // state information
     private int mControlMode = MODE_MANUAL;
+
+    private AdvancedController mAdvancedController;
 
 
     @Override
@@ -120,8 +128,9 @@ public class BebopActivity extends AppCompatActivity {
         // TODO: should be a framework for deciding which controller to initialize
 
         // TODO: does this even work??
-        ManualController manualController = new ManualController(mBebopDrone, findViewById(R.id.piloting_view));
-
+        // the possible controllers
+        ManualController manualController = new ManualController(mBebopDrone, findViewById(R.id.include_manual_control));
+        mAdvancedController = new AdvancedController(mBebopDrone);
     }
 
     @Override
@@ -195,6 +204,9 @@ public class BebopActivity extends AppCompatActivity {
 
         // manual control view
         viewManualControl = findViewById(R.id.include_manual_control);
+
+        // attitude view
+        mAttitudeView = (AttitudeIndicator) findViewById(R.id.view_attitude);
 
         // textviews
         tvBattery = (TextView) findViewById(R.id.text_battery);
@@ -330,6 +342,12 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onPositionChanged(Date timestamp, double lat, double lon, double alt) {
+
+            if (mUserLocation == null || lat == -500.0) {
+                tvDistance.setText("ft");
+                return;
+            }
+
             // convert to a Location for easier handling
             Location dronePos = new Location("Bebop");
             dronePos.setLatitude(lat);
@@ -350,7 +368,7 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onAttitudeChanged(Date timestamp, float roll, float pitch, float yaw) {
-
+            mAttitudeView.setAttitude(roll, pitch, yaw);
         }
 
         @Override

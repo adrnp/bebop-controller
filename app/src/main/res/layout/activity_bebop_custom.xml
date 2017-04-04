@@ -49,6 +49,7 @@
         android:id="@+id/include" />
     
     <edu.stanford.aa122.bebopcontroller.view.AttitudeIndicator
+        android:id="@+id/view_attitude"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_centerHorizontal="true"

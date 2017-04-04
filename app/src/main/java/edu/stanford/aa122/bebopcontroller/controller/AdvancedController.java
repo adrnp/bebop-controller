@@ -7,6 +7,9 @@ import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATE
 
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 
+import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING;
+import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING;
+
 /**
  * Class to handle advanced autonomous control of the Bebop drone.
  *
@@ -67,6 +70,15 @@ public class AdvancedController {
             }
         }
 
+        /**
+         * determine if the bebop has successfully taken off and is therefore ready to fly
+         * @return true if ready to execute flight elements of a mission
+         */
+        private boolean isReadyToFly() {
+            return (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING ||
+                    mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING);
+        }
+
 
         @Override
         public void run() {
@@ -98,7 +110,7 @@ public class AdvancedController {
                 }
 
                 // if the bebop has finished the last command sent to it, then execute the next command
-                if (mBebopDrone.finishedLastCommand()) {
+                if (isReadyToFly() && mBebopDrone.finishedLastCommand()) {
 
                     switch (wpIndex) {
                         case 0:

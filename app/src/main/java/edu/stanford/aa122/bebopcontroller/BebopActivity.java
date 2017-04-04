@@ -226,11 +226,25 @@ public class BebopActivity extends AppCompatActivity {
             public void onClick(View v) {
                 switch (mBebopDrone.getFlyingState()) {
                     case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
-                        mBebopDrone.takeOff();
+
+                        // either takeoff or start the mission - depending on control mode
+                        if (mControlMode == MODE_AUTONOMOUS) {
+                            mAdvancedController.startMission();
+                        } else {
+                            mBebopDrone.takeOff();
+                        }
+
                         break;
                     case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
                     case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
-                        mBebopDrone.land();
+
+                        // either land or stop the mission - depending on control mode
+                        if (mControlMode == MODE_AUTONOMOUS) {
+                            mAdvancedController.stopMission();
+                        } else {
+                            mBebopDrone.land();
+                        }
+
                         break;
                     default:
                 }

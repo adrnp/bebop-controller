@@ -16,7 +16,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
@@ -54,6 +56,9 @@ public class BebopActivity extends AppCompatActivity {
     /** conversion from meters to feet */
     private static final double METERS_TO_FEET = 3.28084;
 
+    /** activity context */
+    private Context mContext;
+
     /** connection to drone to be controlled */
     private BebopDrone mBebopDrone;
 
@@ -79,6 +84,9 @@ public class BebopActivity extends AppCompatActivity {
 
     /** text view for displaying the current mode */
     private TextView tvMode;
+
+    /** image for displaying whether or not the drone has GPS */
+    private ImageView imGps;
 
     /** button for displaying the settings */
     private Button btnSettings;
@@ -107,11 +115,16 @@ public class BebopActivity extends AppCompatActivity {
 
     private AdvancedController mAdvancedController;
 
+    // whether or not the bebop has GPS
+    private boolean mHaveGps = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bebop_custom);
+
+        mContext = this;
 
         // initializing the base buttons of the view
         initView();
@@ -220,6 +233,9 @@ public class BebopActivity extends AppCompatActivity {
         // attitude view
         mAttitudeView = (AttitudeHUDView) findViewById(R.id.view_attitude);
 
+        // gps status image
+        imGps = (ImageView) findViewById(R.id.image_gps);
+
         // textviews
         tvBattery = (TextView) findViewById(R.id.text_battery);
         tvAltitude = (TextView) findViewById(R.id.text_altitude);
@@ -288,7 +304,12 @@ public class BebopActivity extends AppCompatActivity {
                 switch (mControlMode) {
                     case MODE_MANUAL:
                         // switch to autonomous control mode and hide manual controls
-                        // TODO: check to make sure Bebop has GPS before changing to auto!
+                        if (!mHaveGps) {
+                            Toast.makeText(mContext, "Bebop does not have GPS, cannot enter Autonomous Mode!", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        // change to auto
                         mControlMode = MODE_AUTONOMOUS;
                         viewManualControl.setVisibility(View.GONE);
                         tvMode.setText(R.string.mode_auto);
@@ -390,9 +411,17 @@ public class BebopActivity extends AppCompatActivity {
         @Override
         public void onPositionChanged(Date timestamp, double lat, double lon, double alt) {
 
-            if (mUserLocation == null || lat == -500.0) {
+            if (mUserLocation == null || lat == 500.0) {
                 tvDistance.setText("ft");
+                mHaveGps = false;
+                imGps.setVisibility(View.GONE);
                 return;
+            }
+
+            // mark as now having GPS and show the GPS icon
+            if (!mHaveGps) {
+                mHaveGps = true;
+                imGps.setVisibility(View.GONE);
             }
 
             // convert to a Location for easier handling

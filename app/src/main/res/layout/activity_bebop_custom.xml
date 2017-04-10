@@ -55,5 +55,21 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
 
+    <FrameLayout
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/dark_background_transparent">
+
+        <TextView
+            android:id="@+id/text_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Manual"
+            android:textColor="@android:color/white"/>
+    </FrameLayout>
+
 
 </RelativeLayout>

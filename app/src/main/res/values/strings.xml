@@ -4,4 +4,6 @@
     <string name="land">Land</string>
     <string name="mission_start">Start</string>
     <string name="mission_stop">Stop</string>
+    <string name="mode_manual">Manual</string>
+    <string name="mode_auto">Auto</string>
 </resources>

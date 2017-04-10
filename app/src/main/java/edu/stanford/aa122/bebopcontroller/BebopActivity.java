@@ -77,6 +77,9 @@ public class BebopActivity extends AppCompatActivity {
     /** text view for displaying distance from the pilot */
     private TextView tvDistance;
 
+    /** text view for displaying the current mode */
+    private TextView tvMode;
+
     /** button for displaying the settings */
     private Button btnSettings;
 
@@ -221,6 +224,7 @@ public class BebopActivity extends AppCompatActivity {
         tvBattery = (TextView) findViewById(R.id.text_battery);
         tvAltitude = (TextView) findViewById(R.id.text_altitude);
         tvDistance = (TextView) findViewById(R.id.text_distance);
+        tvMode = (TextView) findViewById(R.id.text_mode);
 
         // emergency button
         findViewById(R.id.button_emergency).setOnClickListener(new View.OnClickListener() {
@@ -284,14 +288,17 @@ public class BebopActivity extends AppCompatActivity {
                 switch (mControlMode) {
                     case MODE_MANUAL:
                         // switch to autonomous control mode and hide manual controls
+                        // TODO: check to make sure Bebop has GPS before changing to auto!
                         mControlMode = MODE_AUTONOMOUS;
                         viewManualControl.setVisibility(View.GONE);
+                        tvMode.setText(R.string.mode_auto);
                         break;
 
                     case MODE_AUTONOMOUS:
                         // switch to manual control and display the manual controls
                         mControlMode = MODE_MANUAL;
                         viewManualControl.setVisibility(View.VISIBLE);
+                        tvMode.setText(R.string.mode_manual);
                         break;
                 }
             }

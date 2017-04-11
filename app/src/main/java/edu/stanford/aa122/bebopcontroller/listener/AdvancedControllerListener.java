@@ -18,4 +18,10 @@ public interface AdvancedControllerListener {
      * @param running true if the main loop is currently running.
      */
     void onRunningStateChanged(boolean running);
+
+
+    /**
+     * called when the mission has incremented to the next phase (state)
+     */
+    void onMissionStateUpdated();
 }

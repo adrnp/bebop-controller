@@ -12,6 +12,10 @@
     <include layout="@layout/overlay_manual_control"
         android:id="@+id/include_manual_control"/>
 
+    <include layout="@layout/overlay_mission_info"
+        android:id="@+id/include_mission_info"
+        android:visibility="gone"/>
+
     <ImageButton
         android:id="@+id/button_settings"
         android:layout_width="wrap_content"

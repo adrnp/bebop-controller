@@ -138,21 +138,25 @@ public class AdvancedController {
                     switch (wpIndex) {
                         case 0:
                             // example: move forwards
+                            mListener.onMissionStateUpdated();
                             mBebopDrone.relativeMove(10, 0, -10, 0);  // move 10 meters forward and 10 meters up
                             break;
 
                         case 1:
                             // example: to make a flip
+                            mListener.onMissionStateUpdated();
                             mBebopDrone.flip(ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_FRONT);
                             break;
 
                         case 2:
                             // example: move backwards
+                            mListener.onMissionStateUpdated();
                             mBebopDrone.relativeMove(-10, 0, 0, 0); // move 10 meters backwards
                             break;
 
                         case 3:
                             // example: land
+                            mListener.onMissionStateUpdated();
                             mBebopDrone.land();
                             break;
 

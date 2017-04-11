@@ -38,6 +38,7 @@ import edu.stanford.aa122.bebopcontroller.listener.AdvancedControllerListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.view.AttitudeHUDView;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
+import edu.stanford.aa122.bebopcontroller.view.MissionStateView;
 
 /**
  * Main activity that handles the video display and interaction with the Bebop drone.
@@ -97,6 +98,12 @@ public class BebopActivity extends AppCompatActivity {
     /** view for the manual control elements */
     private View viewManualControl;
 
+    /** view containing the mission state */
+    private View viewMissionInfo;
+
+    /** the element itself that displays the mission state information */
+    private MissionStateView mMissionStateView;
+
     /** view representing the attitude of the drone */
     private AttitudeHUDView mAttitudeView;
 
@@ -154,6 +161,11 @@ public class BebopActivity extends AppCompatActivity {
             @Override
             public void onRunningStateChanged(boolean running) {
                 // TODO: update something for this... (probably need to change mode back to manual if done)
+            }
+
+            @Override
+            public void onMissionStateUpdated() {
+                 mMissionStateView.nextMissionState();
             }
         });
     }
@@ -230,8 +242,15 @@ public class BebopActivity extends AppCompatActivity {
         // manual control view
         viewManualControl = findViewById(R.id.include_manual_control);
 
+        // mission info view
+        viewMissionInfo = findViewById(R.id.include_mission_info);
+
         // attitude view
         mAttitudeView = (AttitudeHUDView) findViewById(R.id.view_attitude);
+
+        // mission state itself
+        mMissionStateView = (MissionStateView) findViewById(R.id.view_mission_state);
+        mMissionStateView.setMissionState(0); // make sure starting at state 0
 
         // gps status image
         imGps = (ImageView) findViewById(R.id.image_gps);

@@ -152,7 +152,7 @@ public class BebopActivity extends AppCompatActivity {
         // the possible controllers - create all of them here
         // they won't ever be used at the same time, so should be ok to create them all here
         ManualController manualController = new ManualController(mBebopDrone, findViewById(R.id.include_manual_control));
-        mAdvancedController = new AdvancedController(mBebopDrone);
+        mAdvancedController = new AdvancedController(this, mBebopDrone);
         mAdvancedController.registerControllerListener(new AdvancedControllerListener() {
             @Override
             public void onWaypointIndexChanged(int wp) {

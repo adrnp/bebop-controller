@@ -442,7 +442,7 @@ public class BebopActivity extends AppCompatActivity {
             // mark as now having GPS and show the GPS icon
             if (!mHaveGps) {
                 mHaveGps = true;
-                imGps.setVisibility(View.GONE);
+                imGps.setVisibility(View.VISIBLE);
             }
 
             // convert to a Location for easier handling

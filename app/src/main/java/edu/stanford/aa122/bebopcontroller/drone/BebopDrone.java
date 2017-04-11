@@ -8,6 +8,9 @@ import android.util.Log;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
+import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM;
+import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM;
+import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORD_VIDEOV2_RECORD_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGEVENT_MOVEBYEND_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
@@ -41,6 +44,8 @@ import edu.stanford.aa122.bebopcontroller.helpers.AttitudeVector;
 import edu.stanford.aa122.bebopcontroller.helpers.VelocityVector;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneMissionListener;
+
+import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED;
 
 
 /**
@@ -97,6 +102,9 @@ public class BebopDrone {
 
     /** helpful state to determine if we have already done a takeoff and are currently flying */
     private boolean mCurrentlyFlying = false;
+
+    /** whether or not the bebop is currently recording video */
+    private boolean mVideoRecording = false;
 
     public BebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
 
@@ -232,6 +240,14 @@ public class BebopDrone {
     }
 
     /**
+     * Determine if the drone is currently recording video.
+     * @return true if currently recording video
+     */
+    public boolean isVideoRecording() {
+        return mVideoRecording;
+    }
+
+    /**
      * Get the current GPS position
      * @return GPS position as a Location
      */
@@ -263,24 +279,36 @@ public class BebopDrone {
         return mFinishedLastCommand;
     }
 
+    /**
+     * command the drone to takeoff
+     */
     public void takeOff() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendPilotingTakeOff();
         }
     }
 
+    /**
+     * command the drone to land
+     */
     public void land() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendPilotingLanding();
         }
     }
 
+    /**
+     * command the drone to execute the emergency procedure (immediately cuts the motors)
+     */
     public void emergency() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendPilotingEmergency();
         }
     }
 
+    /**
+     * command the drone to take a picture
+     */
     public void takePicture() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().sendMediaRecordPictureV2();
@@ -288,7 +316,25 @@ public class BebopDrone {
     }
 
     /**
-     * Move the Bebop drone in the body frame.
+     * command the drone to start recording a video
+     */
+    public void startVideo() {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendMediaRecordVideoV2(ARCOMMANDS_ARDRONE3_MEDIARECORD_VIDEOV2_RECORD_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORD_VIDEOV2_RECORD_START);
+        }
+    }
+
+    /**
+     * command the drone to stop recording a video
+     */
+    public void stopVideo() {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendMediaRecordVideoV2(ARCOMMANDS_ARDRONE3_MEDIARECORD_VIDEOV2_RECORD_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORD_VIDEOV2_RECORD_STOP);
+        }
+    }
+
+    /**
+     * Command the Bebop drone to move in the body frame.
      * @param dx body x translation (front) [m]
      * @param dy body y translation (right side) [m]
      * @param dz body z translation (down) [m]
@@ -343,12 +389,20 @@ public class BebopDrone {
         }
     }
 
+    /**
+     * Set the yaw rotation speed of the drone
+     * @param yaw value in percentage from -100 (max ccw rate) to 100 (max cw rate)
+     */
     public void setYaw(byte yaw) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().setPilotingPCMDYaw(yaw);
         }
     }
 
+    /**
+     * Set the throttle of the drone
+     * @param gaz value in percentage from -100 (max descent rate) to 100 (max ascent rate)
+     */
     public void setGaz(byte gaz) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().setPilotingPCMDGaz(gaz);
@@ -384,6 +438,12 @@ public class BebopDrone {
         mSDCardModule.cancelGetFlightMedias();
     }
 
+    /**
+     * create a discovery device from a discovery device service
+     * @param service the ARDiscoveryDeviceService from the discovery process
+     * @param productType the type of produce that has been discovered
+     * @return device that has been discovered
+     */
     private ARDiscoveryDevice createDiscoveryDevice(@NonNull ARDiscoveryDeviceService service, ARDISCOVERY_PRODUCT_ENUM productType) {
         ARDiscoveryDevice device = null;
         try {
@@ -400,6 +460,12 @@ public class BebopDrone {
         return device;
     }
 
+    /**
+     * create a controller from a discovery device
+     * will allow for controlling and listening to the state information of the device
+     * @param discoveryDevice device that has been discovered
+     * @return controller for the device that has been discovered
+     */
     private ARDeviceController createDeviceController(@NonNull ARDiscoveryDevice discoveryDevice) {
         ARDeviceController deviceController = null;
         try {
@@ -471,6 +537,13 @@ public class BebopDrone {
         }
     }
 
+    private void notifyVideoStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM event, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM error) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
+            listener.onVideoStateChanged(timestamp, event, error);
+        }
+    }
+
     private void notifyConfigureDecoder(ARControllerCodec codec) {
         List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
         for (BebopDroneListener listener : listenersCpy) {
@@ -514,6 +587,7 @@ public class BebopDrone {
     }
     //endregion notify listener block
 
+    /** listener for the sd card information to be able to download pictures and video from the drone */
     private final SDCardModule.Listener mSDCardModuleListener = new SDCardModule.Listener() {
         @Override
         public void onMatchingMediasFound(final int nbMedias) {
@@ -546,6 +620,7 @@ public class BebopDrone {
         }
     };
 
+    /** listener for the state information from the Bebop drone */
     private final ARDeviceControllerListener mDeviceControllerListener = new ARDeviceControllerListener() {
         @Override
         public void onStateChanged(ARDeviceController deviceController, ARCONTROLLER_DEVICE_STATE_ENUM newState, ARCONTROLLER_ERROR_ENUM error) {
@@ -575,7 +650,6 @@ public class BebopDrone {
                 return;
             }
 
-            // TODO: see if can actually do this out here...
             ARControllerArgumentDictionary<Object> args = elementDictionary.get(ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY);
             if (args == null) {
                 return;
@@ -710,13 +784,34 @@ public class BebopDrone {
 
                 /* picture notification */
                 case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED:
-                    final ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error = ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.getFromValue((Integer)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR));
+                    final ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM pictureError = ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.getFromValue((Integer)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR));
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            notifyPictureTaken(now, error);
+                            // notify the changes as needed - note this is mission related so notify of the event
+                            notifyPictureTaken(now, pictureError);
+                            notifyMissionCommandFinished();
                         }
                     });
+                    break;
+
+                /* video notification */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED:
+                    final ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM videoEvent = ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM.getFromValue((Integer)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT));
+                    final ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM videoError = ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM.getFromValue((Integer)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR));
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // update the local recording state
+                            mVideoRecording = ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_START.equals(videoEvent);
+
+                            // notify the changes as needed - note this is mission related so notify of the event
+                            notifyVideoStateChanged(now, videoEvent, videoError);
+                            notifyMissionCommandFinished();
+                        }
+                    });
+
                     break;
 
                 /* run id */

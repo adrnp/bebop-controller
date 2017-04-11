@@ -32,10 +32,12 @@ import java.util.Date;
 import java.util.Locale;
 
 import edu.stanford.aa122.bebopcontroller.controller.AdvancedController;
+import edu.stanford.aa122.bebopcontroller.controller.AutonomousController;
 import edu.stanford.aa122.bebopcontroller.controller.ManualController;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
 import edu.stanford.aa122.bebopcontroller.listener.AdvancedControllerListener;
+import edu.stanford.aa122.bebopcontroller.listener.AutonomousControllerListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.view.AttitudeHUDView;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
@@ -122,6 +124,7 @@ public class BebopActivity extends AppCompatActivity {
     private int mControlMode = MODE_MANUAL;
 
     private AdvancedController mAdvancedController;
+    private AutonomousController mAutonomousController;
 
     // whether or not the bebop has GPS
     private boolean mHaveGps = false;
@@ -152,6 +155,16 @@ public class BebopActivity extends AppCompatActivity {
         // the possible controllers - create all of them here
         // they won't ever be used at the same time, so should be ok to create them all here
         ManualController manualController = new ManualController(mBebopDrone, findViewById(R.id.include_manual_control));
+
+        mAutonomousController = new AutonomousController(this, mBebopDrone);
+        mAutonomousController.registerListener(new AutonomousControllerListener() {
+            @Override
+            public void onMissionSegmentCompleted() {
+                mMissionStateView.nextMissionState();
+            }
+        });
+
+        /*
         mAdvancedController = new AdvancedController(this, mBebopDrone);
         mAdvancedController.registerControllerListener(new AdvancedControllerListener() {
             @Override
@@ -169,6 +182,7 @@ public class BebopActivity extends AppCompatActivity {
                  mMissionStateView.nextMissionState();
             }
         });
+        */
     }
 
     @Override
@@ -295,7 +309,8 @@ public class BebopActivity extends AppCompatActivity {
 
                         // either takeoff or start the mission - depending on control mode
                         if (mControlMode == MODE_AUTONOMOUS) {
-                            mAdvancedController.startMission();
+                            //mAdvancedController.startMission();
+                            mAutonomousController.startMission();
                         } else {
                             mBebopDrone.takeOff();
                         }
@@ -306,7 +321,8 @@ public class BebopActivity extends AppCompatActivity {
 
                         // either land or stop the mission - depending on control mode
                         if (mControlMode == MODE_AUTONOMOUS) {
-                            mAdvancedController.stopMission();
+                            //mAdvancedController.stopMission();
+                            mAutonomousController.stopMission();
                         } else {
                             mBebopDrone.land();
                         }

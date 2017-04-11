@@ -40,6 +40,7 @@ import java.util.List;
 import edu.stanford.aa122.bebopcontroller.helpers.AttitudeVector;
 import edu.stanford.aa122.bebopcontroller.helpers.VelocityVector;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
+import edu.stanford.aa122.bebopcontroller.listener.BebopDroneMissionListener;
 
 
 /**
@@ -59,6 +60,9 @@ public class BebopDrone {
 
     /** list of listeners configured to listener to Bebop events */
     private final List<BebopDroneListener> mListeners;
+
+    /** list of mission listeners */
+    private final List<BebopDroneMissionListener> mMissionListeners;
 
     /** handler */
     private final Handler mHandler;
@@ -91,9 +95,13 @@ public class BebopDrone {
     /** whether or not Bebop has completed the last relative move command sent */
     private boolean mFinishedLastCommand = true;
 
+    /** helpful state to determine if we have already done a takeoff and are currently flying */
+    private boolean mCurrentlyFlying = false;
+
     public BebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
 
         mListeners = new ArrayList<>();
+        mMissionListeners = new ArrayList<>();
 
         // needed because some callbacks will be called on the main thread
         mHandler = new Handler(context.getMainLooper());
@@ -144,8 +152,16 @@ public class BebopDrone {
         mListeners.add(listener);
     }
 
+    public void addMissionListener(BebopDroneMissionListener listener) {
+        mMissionListeners.add(listener);
+    }
+
     public void removeListener(BebopDroneListener listener) {
         mListeners.remove(listener);
+    }
+
+    public void removeMissionListener(BebopDroneMissionListener listener) {
+        mMissionListeners.remove(listener);
     }
     //endregion Listener
 
@@ -197,6 +213,24 @@ public class BebopDrone {
      */
     public ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM getFlyingState() {
         return mFlyingState;
+    }
+
+    /**
+     * Determine whether or not the drone is in the landed state.
+     * @return true if landed
+     */
+    public boolean isLanded() {
+        return mFlyingState == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED;
+    }
+
+    /**
+     * Determine if the drone is ready to take move commands.
+     * requires the drone either be flying or hovering.
+     * @return true if flying or hovering
+     */
+    public boolean isReadyToFly() {
+        return (mFlyingState == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING ||
+                mFlyingState == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING);
     }
 
     /**
@@ -473,6 +507,13 @@ public class BebopDrone {
             listener.onDownloadComplete(mediaName);
         }
     }
+
+    private void notifyMissionCommandFinished() {
+        List<BebopDroneMissionListener> listenersCpy = new ArrayList<>(mMissionListeners);
+        for (BebopDroneMissionListener listener : listenersCpy) {
+            listener.onCommandFinished();
+        }
+    }
     //endregion notify listener block
 
     private final SDCardModule.Listener mSDCardModuleListener = new SDCardModule.Listener() {
@@ -566,6 +607,13 @@ public class BebopDrone {
                         public void run() {
                             mFlyingState = state;
                             notifyPilotingStateChanged(now, state);
+
+                            // takeoff is one of the initial mission commands and doesn't trigger a move end
+                            // so need to manually trigger the command finished
+                            if (isReadyToFly() && !mCurrentlyFlying) {
+                                mCurrentlyFlying = true;
+                                notifyMissionCommandFinished();
+                            }
                         }
                     });
                     break;
@@ -655,6 +703,8 @@ public class BebopDrone {
 
                             // mark as having just finished a command
                             mFinishedLastCommand = true;
+
+                            notifyMissionCommandFinished();
                         }
                     });
 

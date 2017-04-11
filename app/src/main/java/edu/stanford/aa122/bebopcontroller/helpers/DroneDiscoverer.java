@@ -185,10 +185,8 @@ public class DroneDiscoverer {
                         mMatchingDrones.clear();
                         List<ARDiscoveryDeviceService> deviceList = mArdiscoveryService.getDeviceServicesArray();
 
-                        if (deviceList != null)
-                        {
-                            for (ARDiscoveryDeviceService service : deviceList)
-                            {
+                        if (deviceList != null)  {
+                            for (ARDiscoveryDeviceService service : deviceList) {
                                 mMatchingDrones.add(service);
                             }
                         }

@@ -119,8 +119,7 @@ public class BebopDrone {
                 discoveryDevice.dispose();
             }
 
-            try
-            {
+            try {
                 String productIP = ((ARDiscoveryDeviceNetService)(deviceService.getDevice())).getIp();
 
                 ARUtilsManager ftpListManager = new ARUtilsManager();
@@ -131,9 +130,7 @@ public class BebopDrone {
 
                 mSDCardModule = new SDCardModule(ftpListManager, ftpQueueManager);
                 mSDCardModule.addListener(mSDCardModuleListener);
-            }
-            catch (ARUtilsException e)
-            {
+            } catch (ARUtilsException e) {
                 Log.e(TAG, "Exception", e);
             }
 
@@ -143,8 +140,9 @@ public class BebopDrone {
     }
 
     public void dispose() {
-        if (mDeviceController != null)
+        if (mDeviceController != null) {
             mDeviceController.dispose();
+        }
     }
 
     //region Listener functions

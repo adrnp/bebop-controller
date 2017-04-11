@@ -41,9 +41,10 @@ public class DeviceListActivity extends AppCompatActivity {
     private static final String TAG = "DeviceListActivity";
 
     /** List of runtime permission we need. */
-    private static final String[] PERMISSIONS_NEEDED = new String[]{
+    private static final String[] PERMISSIONS_NEEDED = new String[] {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
     };
 
     /** Code for permission request result handling. */
@@ -60,19 +61,16 @@ public class DeviceListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
         final ListView listView = (ListView) findViewById(R.id.list);
 
         // Assign adapter to ListView
         listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-            {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // launch the activity related to the type of discovery device service
                 Intent intent = null;
 
@@ -91,22 +89,6 @@ public class DeviceListActivity extends AppCompatActivity {
 
                     case ARDISCOVERY_PRODUCT_SKYCONTROLLER_2:
                         intent = new Intent(DeviceListActivity.this, SkyController2Activity.class);
-                        break;
-
-                    case ARDISCOVERY_PRODUCT_JS:
-                    case ARDISCOVERY_PRODUCT_JS_EVO_LIGHT:
-                    case ARDISCOVERY_PRODUCT_JS_EVO_RACE:
-                        intent = new Intent(DeviceListActivity.this, JSActivity.class);
-                        break;
-
-                    case ARDISCOVERY_PRODUCT_MINIDRONE:
-                    case ARDISCOVERY_PRODUCT_MINIDRONE_EVO_BRICK:
-                    case ARDISCOVERY_PRODUCT_MINIDRONE_EVO_LIGHT:
-                    case ARDISCOVERY_PRODUCT_MINIDRONE_DELOS3:
-                        intent = new Intent(DeviceListActivity.this, MiniDroneActivity.class);
-                        break;
-                    case ARDISCOVERY_PRODUCT_MINIDRONE_WINGX:
-                        intent = new Intent(DeviceListActivity.this, SwingDroneActivity.class);
                         break;
                     */
 
@@ -143,8 +125,7 @@ public class DeviceListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
 
         // setup the drone discoverer and register as listener
@@ -156,8 +137,7 @@ public class DeviceListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
 
         // clean the drone discoverer object
@@ -200,33 +180,28 @@ public class DeviceListActivity extends AppCompatActivity {
         }
     };
 
-    static class ViewHolder {
+    private static class ViewHolder {
         public TextView text;
     }
 
-    private final BaseAdapter mAdapter = new BaseAdapter()
-    {
+    private final BaseAdapter mAdapter = new BaseAdapter() {
         @Override
-        public int getCount()
-        {
+        public int getCount() {
             return mDronesList.size();
         }
 
         @Override
-        public Object getItem(int position)
-        {
+        public Object getItem(int position) {
             return mDronesList.get(position);
         }
 
         @Override
-        public long getItemId(int position)
-        {
+        public long getItemId(int position) {
             return 0;
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent)
-        {
+        public View getView(int position, View convertView, ViewGroup parent) {
             View rowView = convertView;
             // reuse views
             if (rowView == null) {

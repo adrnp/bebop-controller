@@ -241,9 +241,20 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onDestroy() {
-        mBebopDrone.dispose();
+    protected void onStop() {
+        if (mBebopDrone != null) {
+            mBebopDrone.disconnect();
+        }
         mDataLogger.stopLogging();
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mBebopDrone != null) {
+            mBebopDrone.disconnect();
+            mBebopDrone.dispose();
+        }
         super.onDestroy();
     }
 

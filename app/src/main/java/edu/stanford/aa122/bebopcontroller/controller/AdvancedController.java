@@ -1,6 +1,9 @@
 package edu.stanford.aa122.bebopcontroller.controller;
 
+import android.content.Context;
 import android.location.Location;
+import android.os.Handler;
+import android.widget.Toast;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
@@ -29,13 +32,19 @@ public class AdvancedController {
     /** the registered listener to notify changes through */
     private AdvancedControllerListener mListener;
 
+    private Context mContext;
+
+    private Handler mHandler;
+
     /**
      * constructor for advanced controller
      * @param drone BebopDrone that will be controlled
      */
-    public AdvancedController(BebopDrone drone) {
-        // TODO: decide if this needs to also be a listener or is there a way to be able to see when a move it done without being a listener
+    public AdvancedController(Context context, BebopDrone drone) {
+        mContext = context;
         mBebopDrone = drone;
+
+        mHandler = new Handler(mContext.getMainLooper());
     }
 
     /**
@@ -66,6 +75,18 @@ public class AdvancedController {
     public void stopMission() {
         if (mThread != null && mThread.isAlive()) {
             mThread.interrupt();
+        }
+    }
+
+    private void updateListenerState() {
+        if (mListener != null) {
+            mListener.onMissionStateUpdated();
+        }
+    }
+
+    private void updateListenerRunning(boolean running) {
+        if (mListener != null) {
+            mListener.onRunningStateChanged(running);
         }
     }
 
@@ -100,9 +121,12 @@ public class AdvancedController {
         public void run() {
 
             // notify loop is now running
-            if (mListener != null) {
-                mListener.onRunningStateChanged(true);
-            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updateListenerRunning(true);
+                }
+            });
 
             // timestamp of last loop run - needed for loop being at a specific frequency
             long lastLoopTime = System.currentTimeMillis();
@@ -132,53 +156,76 @@ public class AdvancedController {
                     mBebopDrone.takeOff();
                 }
 
-                // if the bebop has finished the last command sent to it, then execute the next command
-                if (isReadyToFly() && mBebopDrone.finishedLastCommand()) {
-
-                    switch (wpIndex) {
-                        case 0:
-                            // example: move forwards
-                            mListener.onMissionStateUpdated();
-                            mBebopDrone.relativeMove(10, 0, -10, 0);  // move 10 meters forward and 10 meters up
-                            break;
-
-                        case 1:
-                            // example: to make a flip
-                            mListener.onMissionStateUpdated();
-                            mBebopDrone.flip(ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_FRONT);
-                            break;
-
-                        case 2:
-                            // example: move backwards
-                            mListener.onMissionStateUpdated();
-                            mBebopDrone.relativeMove(-10, 0, 0, 0); // move 10 meters backwards
-                            break;
-
-                        case 3:
-                            // example: land
-                            mListener.onMissionStateUpdated();
-                            mBebopDrone.land();
-                            break;
-
-                        default:
-                            // exit out of the loop
-                            finished = true;
-
-                            // notify loop is no longer running
-                            if (mListener != null) {
-                                mListener.onRunningStateChanged(false);
-                            }
-                            break;
-                    }
-
-                    // increment the waypoint index as needed
-                    wpIndex++;
-
-                    // notify of waypoint update
-                    if (mListener != null) {
-                        mListener.onWaypointIndexChanged(wpIndex);
-                    }
+                // make sure we are up in the air before doing anything else
+                if (!isReadyToFly()) {
+                    continue;
                 }
+
+                // make sure the drone has finished the last command it was executing
+                if (!mBebopDrone.finishedLastCommand()) {
+                    continue;
+                }
+
+                // now can execute the next command
+                switch (wpIndex) {
+                    case 0:
+                        // example: move forwards
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListenerState();
+                            }
+                        });
+                        mBebopDrone.relativeMove(5, 0, -2, 0);  // move 10 meters forward and 10 meters up
+                        break;
+
+                    /*
+                    case 1:
+                        // example: to make a flip
+                        mListener.onMissionStateUpdated();
+                        mBebopDrone.flip(ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_FRONT);
+                        break;
+                    */
+
+                    case 1:
+                        // example: move backwards
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListenerState();
+                            }
+                        });
+                        mBebopDrone.relativeMove(-2, 0, 0, 0); // move 10 meters backwards
+                        break;
+
+                    case 2:
+                        // example: land
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListenerState();
+                            }
+                        });
+                        mBebopDrone.land();
+                        finished = true;
+                        break;
+
+                    default:
+                        // exit out of the loop
+                        finished = true;
+
+                        // notify loop is no longer running
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListenerRunning(false);
+                            }
+                        });
+                        break;
+                }
+
+                // increment the waypoint index as needed
+                wpIndex++;
 
             }
         }

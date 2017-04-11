@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
@@ -322,29 +323,85 @@ public class BebopActivity extends AppCompatActivity {
             public void onClick(View view) {
                 switch (mControlMode) {
                     case MODE_MANUAL:
-                        // switch to autonomous control mode and hide manual controls
-                        if (!mHaveGps) {
-                            Toast.makeText(mContext, "Bebop does not have GPS, cannot enter Autonomous Mode!", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        // change to auto
-                        mControlMode = MODE_AUTONOMOUS;
-                        viewManualControl.setVisibility(View.GONE);
-                        viewMissionInfo.setVisibility(View.VISIBLE);
-                        tvMode.setText(R.string.mode_auto);
+                        // switch to auto
+                        changeControlMode(MODE_AUTONOMOUS);
                         break;
 
                     case MODE_AUTONOMOUS:
                         // switch to manual control and display the manual controls
-                        mControlMode = MODE_MANUAL;
-                        viewMissionInfo.setVisibility(View.GONE);
-                        viewManualControl.setVisibility(View.VISIBLE);
-                        tvMode.setText(R.string.mode_manual);
+                        changeControlMode(MODE_MANUAL);
                         break;
                 }
             }
         });
+
+        // XXX: for testing purposes....
+        findViewById(R.id.button_next).setOnClickListener(new View.OnClickListener() {
+
+            private boolean isReadyToFly() {
+                return (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING ||
+                        mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING);
+            }
+
+            int wpIndex = 0;
+
+            @Override
+            public void onClick(View view) {
+                if (mControlMode != MODE_AUTONOMOUS) {
+                    Toast.makeText(mContext, "Need to be in Autonomous Mode!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // takeoff if needed (if the current state is landed)
+                if (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED) {
+                    mBebopDrone.takeOff();
+                    wpIndex = 0; // reset to the beginning of the mission
+                }
+
+                // make sure we are up in the air before doing anything else
+                if (!isReadyToFly()) {
+                    Toast.makeText(mContext, "Not airborne yet!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // make sure the drone has finished the last command it was executing
+                if (!mBebopDrone.finishedLastCommand()) {
+                    Toast.makeText(mContext, "Last command is still running!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // at this point we are ready to execute the next action
+                switch (wpIndex) {
+                    case 0:
+                        // example: move forwards
+                        mMissionStateView.nextMissionState();
+                        mBebopDrone.relativeMove(5, 0, -2, 0);  // move 10 meters forward and 10 meters up
+                        break;
+
+                    case 1:
+                        // example: move backwards
+                        mMissionStateView.nextMissionState();
+                        mBebopDrone.relativeMove(-2, 0, 0, 0); // move 10 meters backwards
+                        break;
+
+                    case 2:
+                        // example: land
+                        mMissionStateView.nextMissionState();
+                        mBebopDrone.land();
+                        break;
+
+                    default:
+                        // go back to manual control
+                        changeControlMode(MODE_MANUAL);
+                        wpIndex = 0;
+                        break;
+                }
+
+                // increment the waypoint index as needed
+                wpIndex++;
+            }
+        });
+
 
         /*
         // TODO: add a take picture button
@@ -382,6 +439,39 @@ public class BebopActivity extends AppCompatActivity {
 
 
     }
+
+
+    /**
+     * set the control mode to either Manual or Auto and configure the layout accordingly.
+     * @param controlMode the desired mode to change to
+     */
+    private void changeControlMode(int controlMode) {
+
+        switch (controlMode) {
+            case MODE_AUTONOMOUS:
+                // switch to autonomous control mode and hide manual controls
+                if (!mHaveGps) {
+                    Toast.makeText(mContext, "Bebop does not have GPS, cannot enter Autonomous Mode!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // change to auto
+                mControlMode = MODE_AUTONOMOUS;
+                viewManualControl.setVisibility(View.GONE);
+                viewMissionInfo.setVisibility(View.VISIBLE);
+                tvMode.setText(R.string.mode_auto);
+                break;
+
+            case MODE_MANUAL:
+                // switch to manual control and display the manual controls
+                mControlMode = MODE_MANUAL;
+                viewMissionInfo.setVisibility(View.GONE);
+                viewManualControl.setVisibility(View.VISIBLE);
+                tvMode.setText(R.string.mode_manual);
+                break;
+        }
+    }
+
 
     /** listener for the bebop drone information */
     private final BebopDroneListener mBebopListener = new BebopDroneListener() {

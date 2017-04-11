@@ -64,7 +64,8 @@
         android:layout_height="20dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="@color/dark_background_transparent">
+        android:background="@color/dark_background_transparent"
+        android:id="@+id/frameLayout">
 
         <TextView
             android:id="@+id/text_mode"
@@ -74,6 +75,16 @@
             android:text="Manual"
             android:textColor="@android:color/white"/>
     </FrameLayout>
+
+    <Button
+        android:id="@+id/button_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="36dp"
+        android:layout_marginRight="36dp"
+        android:layout_toLeftOf="@+id/frameLayout"
+        android:layout_toStartOf="@+id/frameLayout"
+        android:text="Next"/>
 
 
 </RelativeLayout>

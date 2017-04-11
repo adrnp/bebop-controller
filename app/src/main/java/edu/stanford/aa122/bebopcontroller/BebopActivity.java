@@ -331,12 +331,14 @@ public class BebopActivity extends AppCompatActivity {
                         // change to auto
                         mControlMode = MODE_AUTONOMOUS;
                         viewManualControl.setVisibility(View.GONE);
+                        viewMissionInfo.setVisibility(View.VISIBLE);
                         tvMode.setText(R.string.mode_auto);
                         break;
 
                     case MODE_AUTONOMOUS:
                         // switch to manual control and display the manual controls
                         mControlMode = MODE_MANUAL;
+                        viewMissionInfo.setVisibility(View.GONE);
                         viewManualControl.setVisibility(View.VISIBLE);
                         tvMode.setText(R.string.mode_manual);
                         break;

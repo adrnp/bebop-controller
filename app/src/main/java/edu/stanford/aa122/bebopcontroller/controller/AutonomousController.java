@@ -54,6 +54,9 @@ public class AutonomousController {
         // flag the mission as running
         mRunning = true;
 
+        // initialize the mission
+        initializeMission();
+
         // kick off the mission
         controlDrone();
     }
@@ -81,6 +84,22 @@ public class AutonomousController {
     private int wpIndex = 0;  // to keep track of what should be done next
 
     // -------------------------------------------------------------------------------------- //
+
+
+    /**
+     * function called when mission start is pressed to make sure that the missin is properly initialized.
+     *
+     * Note: it is important you put any desired initialize here to ensure proper functionality
+     * when you stop a mission and want to be able to restart the mission from the beginning.
+     */
+    private void initializeMission() {
+        // TODO: write your code here for mission initialization
+
+        // ----------------------------------- EXAMPLE ------------------------------------------ //
+        wpIndex = 0;  // make sure waypoint index is set to 0 when mission starts
+
+        // -------------------------------------------------------------------------------------- //
+    }
 
 
     /**

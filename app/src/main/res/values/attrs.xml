@@ -6,4 +6,10 @@
         <attr name="drawableLeft" format="integer" />
         <attr name="drawableRight" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="SeekBarPreference">
+        <attr name="title" format="string"/>
+        <attr name="details" format="string"/>
+        <attr name="max" format="integer"/>
+    </declare-styleable>
 </resources>

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -37,6 +38,7 @@ import edu.stanford.aa122.bebopcontroller.controller.AdvancedController;
 import edu.stanford.aa122.bebopcontroller.controller.AutonomousController;
 import edu.stanford.aa122.bebopcontroller.controller.ManualController;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
+import edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment;
 import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
 import edu.stanford.aa122.bebopcontroller.listener.AdvancedControllerListener;
 import edu.stanford.aa122.bebopcontroller.listener.AutonomousControllerListener;
@@ -94,9 +96,6 @@ public class BebopActivity extends AppCompatActivity {
     /** image for displaying whether or not the drone has GPS */
     private ImageView imGps;
 
-    /** button for displaying the settings */
-    private Button btnSettings;
-
     /** button for the main action (takeoff, landing, mission start, etc) */
     private Button btnAction;
 
@@ -133,6 +132,9 @@ public class BebopActivity extends AppCompatActivity {
 
     // XXX: testing
     private boolean mStarted = false;
+
+    // flag for whether or not settings are currently being shown
+    private boolean mSettingsShowing = false;
 
 
     @Override
@@ -437,6 +439,23 @@ public class BebopActivity extends AppCompatActivity {
 
                 // increment the waypoint index as needed
                 wpIndex++;
+            }
+        });
+
+        // settings button
+        findViewById(R.id.button_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mSettingsShowing) {
+                    // hide the settings
+                    mSettingsShowing = false;
+                    getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.frame_settings)).commit();
+                    findViewById(R.id.frame_settings).setVisibility(View.GONE);
+                } else {
+                    // show the settings
+                    mSettingsShowing = true;
+                    getFragmentManager().beginTransaction().add(R.id.frame_settings, new BebopPreferenceFragment()).commit();
+                }
             }
         });
 

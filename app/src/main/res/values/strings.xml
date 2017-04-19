@@ -6,4 +6,15 @@
     <string name="mission_stop">Stop</string>
     <string name="mode_manual">Manual</string>
     <string name="mode_auto">Auto</string>
+    <string name="pref_category_bebop">Bebop</string>
+    <string name="pref_bebop_max_pitch">Max Pitch/Roll</string>
+    <string name="pref_bebop_max_yaw">Max Yaw Rate</string>
+    <string name="pref_bebop_max_vh">Max Horizontal Velocity</string>
+    <string name="pref_bebop_max_vv">Max Vertical Velocity</string>
+    <string name="pref_bebop_max_alt">Max Altitude</string>
+    <string name="pref_bebop_max_distance">Max Distance</string>
+    <string name="pref_category_joystick">Joystick</string>
+    <string name="pref_joystick_max_pitch">Max Pitch/Roll</string>
+    <string name="pref_joystick_max_yaw">Max Yaw Rate</string>
+    <string name="pref_joystick_max_throttle">Max Throttle</string>
 </resources>

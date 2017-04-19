@@ -131,6 +131,9 @@ public class BebopActivity extends AppCompatActivity {
     // whether or not the bebop has GPS
     private boolean mHaveGps = false;
 
+    // XXX: testing
+    private boolean mStarted = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,6 +222,7 @@ public class BebopActivity extends AppCompatActivity {
 
             // if the connection to the Bebop fails, finish the activity
             if (!mBebopDrone.connect()) {
+                Toast.makeText(mContext, "connection error", Toast.LENGTH_SHORT).show();
                 finish();
             }
 
@@ -237,6 +241,7 @@ public class BebopActivity extends AppCompatActivity {
             mConnectionProgressDialog.show();
 
             if (!mBebopDrone.disconnect()) {
+                Toast.makeText(mContext, "disconnect error", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }
@@ -244,8 +249,11 @@ public class BebopActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        Toast.makeText(mContext, "stopping", Toast.LENGTH_SHORT).show();
         if (mBebopDrone != null) {
             mBebopDrone.disconnect();
+            mBebopDrone.dispose();
+            mBebopDrone = null;
         }
         mDataLogger.stopLogging();
         super.onStop();
@@ -256,6 +264,7 @@ public class BebopActivity extends AppCompatActivity {
         if (mBebopDrone != null) {
             mBebopDrone.disconnect();
             mBebopDrone.dispose();
+            mBebopDrone = null;
         }
         super.onDestroy();
     }
@@ -509,12 +518,27 @@ public class BebopActivity extends AppCompatActivity {
             switch (state)
             {
                 case ARCONTROLLER_DEVICE_STATE_RUNNING:
+                    Toast.makeText(mContext, "drone connection now running", Toast.LENGTH_SHORT).show();
+                    mStarted = true;
+
                     mConnectionProgressDialog.dismiss();
                     break;
 
                 case ARCONTROLLER_DEVICE_STATE_STOPPED:
+                    Toast.makeText(mContext, "drone connection now stopped", Toast.LENGTH_SHORT).show();
+
+                    if (!mStarted) {
+                        break;
+                    }
+                    mStarted = false;
+
                     // if the deviceController is stopped, go back to the previous activity
                     mConnectionProgressDialog.dismiss();
+
+                    // dispose of the drone properly
+                    mBebopDrone.dispose();
+                    mBebopDrone = null;
+
                     finish();
                     break;
 

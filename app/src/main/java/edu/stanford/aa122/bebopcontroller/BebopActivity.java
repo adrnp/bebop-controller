@@ -335,6 +335,7 @@ public class BebopActivity extends AppCompatActivity {
                         if (mControlMode == MODE_AUTONOMOUS) {
                             //mAdvancedController.startMission();
                             mAutonomousController.startMission();
+                            mMissionStateView.setMissionState(0); // make sure we are marked as just started
                         } else {
                             mBebopDrone.takeOff();
                         }
@@ -643,6 +644,18 @@ public class BebopActivity extends AppCompatActivity {
         @Override
         public void onVideoStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM event, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM error) {
 
+            // only do this visual indication if the autonomous layout is visible
+            if (mControlMode == MODE_AUTONOMOUS) {
+                switch (event) {
+                    case ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_START:
+                        mMissionStateView.startVideo();
+                        break;
+
+                    case ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_STOP:
+                        mMissionStateView.stopVideo();
+                        break;
+                }
+            }
         }
 
         @Override

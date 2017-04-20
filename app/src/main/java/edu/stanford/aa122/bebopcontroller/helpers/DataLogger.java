@@ -49,9 +49,6 @@ public class DataLogger implements BebopDroneListener {
     private BufferedWriter mFileWriter;
     private File mFile;
 
-    /* date format that will be used for all the logs */
-    private SimpleDateFormat mDateFormatter = new SimpleDateFormat("HH:mm:ss.SSS", Locale.US);
-
     /**
      * Constructor
      * @param context  context containing this instance
@@ -82,7 +79,7 @@ public class DataLogger implements BebopDroneListener {
 
             // name, create, and open the file
             // TODO: figure out the desired naming scheme for my files
-            SimpleDateFormat formatter = new SimpleDateFormat("yyy_MM_dd_HH_mm_ss");
+            SimpleDateFormat formatter = new SimpleDateFormat("yyy_MM_dd_HH_mm_ss", Locale.US);
             Date now = new Date();
             String fileName = String.format("%s_log_%s.txt", FILE_PREFIX, formatter.format(now));
             File currentFile = new File(baseDirectory, fileName);
@@ -123,7 +120,6 @@ public class DataLogger implements BebopDroneListener {
             // make references to file "global" for the class
             mFile = currentFile;
             mFileWriter = currentFileWriter;
-            Toast.makeText(mContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
 
             // set boolean to the fact that we should be logging
             mLogging = true;
@@ -131,12 +127,16 @@ public class DataLogger implements BebopDroneListener {
 
     }
 
-    // TODO: decide if this is necessary
+    /**
+     * temporarily pause the logging on the Bebop drone data.
+     */
     public void pauseLogging() {
         mLogging = false;
     }
 
-    // TODO: decide if this is necessary
+    /**
+     * restart the logging of the Bebop drone data.
+     */
     public void restartLogging() {
         mLogging = true;
     }
@@ -158,9 +158,6 @@ public class DataLogger implements BebopDroneListener {
         }
     }
 
-    // TODO: setup the file for logging
-    // TODO: add everything needed for async handling of the file
-
 
     /* Listener methods below */
 
@@ -172,12 +169,38 @@ public class DataLogger implements BebopDroneListener {
 
     @Override
     public void onBatteryChargeChanged(Date timestamp, int batteryPercentage) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
 
+            String newLine = String.format(Locale.US, "BAT:%d,%d", timestamp.getTime(), batteryPercentage);
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
 
+            String newLine = String.format(Locale.US, "PIL:%d,%d", timestamp.getTime(), state.getValue());
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -187,11 +210,7 @@ public class DataLogger implements BebopDroneListener {
                 return;
             }
 
-            // format the row of data to add to the file
-            String ts = mDateFormatter.format(timestamp);
-            String newLine = String.format(Locale.US, "POS:%s,%f,%f,%f", ts, lat, lon, alt);
-
-            // add the line to the file
+            String newLine = String.format(Locale.US, "POS:%d,%f,%f,%f", timestamp.getTime(), lat, lon, alt);
             try {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
@@ -210,11 +229,8 @@ public class DataLogger implements BebopDroneListener {
                 return;
             }
 
-            // format the row of data to add to the file
-            String ts = mDateFormatter.format(timestamp);
-            String newLine = String.format(Locale.US, "VEL:%s,%f,%f,%f", ts, vx, vy, vz);
-
             // add the line to the file
+            String newLine = String.format(Locale.US, "VEL:%d,%f,%f,%f", timestamp.getTime(), vx, vy, vz);
             try {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
@@ -233,11 +249,8 @@ public class DataLogger implements BebopDroneListener {
                 return;
             }
 
-            // format the row of data to add to the file
-            String ts = mDateFormatter.format(timestamp);
-            String newLine = String.format(Locale.US, "ATT:%s,%f,%f,%f", ts, roll, pitch, yaw);
-
             // add the line to the file
+            String newLine = String.format(Locale.US, "ATT:%d,%f,%f,%f", timestamp.getTime(), roll, pitch, yaw);
             try {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
@@ -250,17 +263,56 @@ public class DataLogger implements BebopDroneListener {
 
     @Override
     public void onRelativeAltitudeChanged(Date timestamp, double alt) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
 
+            String newLine = String.format(Locale.US, "ALT:%d,%f", timestamp.getTime(), alt);
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
 
+            String newLine = String.format(Locale.US, "PIC:%d,%d", timestamp.getTime(), error.getValue());
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void onVideoStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM event, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM error) {
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
 
+            String newLine = String.format(Locale.US, "VID:%d,%d,%d", timestamp.getTime(), event.getValue(), error.getValue());
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

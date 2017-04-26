@@ -124,7 +124,7 @@ public class AutonomousController {
 
         // send a takeoff command if on the ground
         if (mBebopDrone.isLanded()) {
-            Toast.makeText(mContext, "Taking Off!", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "Taking Off!", Toast.LENGTH_SHORT).show();
             mBebopDrone.takeOff();
             return;
         }
@@ -138,42 +138,26 @@ public class AutonomousController {
                 break;
 
             case 1:
-                // start the video
+                // start the video and rotate
                 notifyMissionSegmentCompleted();
                 mBebopDrone.startVideo();
-                break;
-
-            case 2:
-                // rotate 180 degrees
-                notifyMissionSegmentCompleted();
                 mBebopDrone.relativeMove(0, 0, 0, 180);
                 break;
 
-            case 3:
+            case 2:
                 // move forward 5 meters
                 notifyMissionSegmentCompleted();
                 mBebopDrone.relativeMove(5, 0, 0, 0);
                 break;
 
-            case 4:
-                // stop video
+            case 3:
+                // stop video and rotate 180 degrees
                 notifyMissionSegmentCompleted();
                 mBebopDrone.stopVideo();
-                break;
-
-            case 5:
-                // rotate 180 degrees
-                notifyMissionSegmentCompleted();
                 mBebopDrone.relativeMove(0, 0, 0, 180);
                 break;
 
-            case 6:
-                // move backward 5 meters
-                notifyMissionSegmentCompleted();
-                mBebopDrone.relativeMove(-5, 0, 0, 0);
-                break;
-
-            case 7:
+            case 4:
                 // example: land
                 notifyMissionSegmentCompleted();
                 mBebopDrone.land();

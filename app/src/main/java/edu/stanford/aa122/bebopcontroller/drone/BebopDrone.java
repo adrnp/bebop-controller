@@ -816,7 +816,6 @@ public class BebopDrone {
 
                             // notify the changes as needed - note this is mission related so notify of the event
                             notifyVideoStateChanged(now, videoEvent, videoError);
-                            notifyMissionCommandFinished();
                         }
                     });
 

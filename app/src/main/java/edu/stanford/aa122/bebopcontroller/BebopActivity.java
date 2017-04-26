@@ -555,6 +555,8 @@ public class BebopActivity extends AppCompatActivity {
         public void onRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error) {
             if (error != 0) {
                 Toast.makeText(getApplicationContext(), "move error: " + error, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "move ended" + error, Toast.LENGTH_SHORT).show();
             }
         }
 

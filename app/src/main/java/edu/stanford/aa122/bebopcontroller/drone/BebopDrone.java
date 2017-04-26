@@ -530,6 +530,13 @@ public class BebopDrone {
         }
     }
 
+    private void notifyRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error) {
+        List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
+        for (BebopDroneListener listener : listenersCpy) {
+            listener.onRelativeMoveEnded(timestamp, dx, dy, dz, dpsi, error);
+        }
+    }
+
     private void notifyPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
         List<BebopDroneListener> listenersCpy = new ArrayList<>(mListeners);
         for (BebopDroneListener listener : listenersCpy) {
@@ -773,9 +780,10 @@ public class BebopDrone {
                         public void run() {
                             // TODO: notify relative move changed
 
+                            notifyRelativeMoveEnded(now, dX, dY, dZ, dPsi, relativeMoveError.getValue());
+
                             // mark as having just finished a command
                             mFinishedLastCommand = true;
-
                             notifyMissionCommandFinished();
                         }
                     });

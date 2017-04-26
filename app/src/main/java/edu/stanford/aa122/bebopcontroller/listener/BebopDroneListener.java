@@ -74,10 +74,18 @@ public interface BebopDroneListener {
      */
     void onRelativeAltitudeChanged(Date timestamp, double alt);
 
-        /*
-        // TODO: probably change this to a waypoint completion broadcast...
-        void onRelativeMoveEnded();
-        */
+
+    /**
+     * Called when a relative move command has been completed.
+     * @param timestamp the phone timestamp for the time the command was registered as completed
+     * @param dx body X distance moved [m]
+     * @param dy body Y distance moved [m]
+     * @param dz body Z distance moved [m]
+     * @param dpsi heading changed [deg]
+     * @param error the error code (0 if successful)
+     */
+    void onRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error);
+
 
     /**
      * Called when a picture is taken

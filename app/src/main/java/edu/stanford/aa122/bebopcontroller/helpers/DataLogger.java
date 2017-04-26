@@ -280,6 +280,11 @@ public class DataLogger implements BebopDroneListener {
     }
 
     @Override
+    public void onRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error) {
+        // TODO: figure out what should be logged here, if anything
+    }
+
+    @Override
     public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
         synchronized (mFileLock) {
             if (mFileWriter == null) {

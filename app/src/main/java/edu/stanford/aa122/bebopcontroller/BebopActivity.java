@@ -621,6 +621,13 @@ public class BebopActivity extends AppCompatActivity {
         }
 
         @Override
+        public void onRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error) {
+            if (error != 0) {
+                Toast.makeText(getApplicationContext(), "move error: " + error, Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
         public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
             Log.i(TAG, "Picture has been taken");
         }

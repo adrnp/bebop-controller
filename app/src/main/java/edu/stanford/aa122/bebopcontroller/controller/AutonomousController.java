@@ -126,6 +126,7 @@ public class AutonomousController {
         if (mBebopDrone.isLanded()) {
             Toast.makeText(mContext, "Taking Off!", Toast.LENGTH_LONG).show();
             mBebopDrone.takeOff();
+            return;
         }
 
         // send a different command based on the current index of motion

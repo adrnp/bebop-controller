@@ -308,7 +308,6 @@ public class BebopActivity extends AppCompatActivity {
 
                         // either takeoff or start the mission - depending on control mode
                         if (mControlMode == MODE_AUTONOMOUS) {
-                            //mAdvancedController.startMission();
                             mAutonomousController.startMission();
                             mMissionStateView.setMissionState(0); // make sure we are marked as just started
                         } else {
@@ -321,7 +320,6 @@ public class BebopActivity extends AppCompatActivity {
 
                         // either land or stop the mission - depending on control mode
                         if (mControlMode == MODE_AUTONOMOUS) {
-                            //mAdvancedController.stopMission();
                             mAutonomousController.stopMission();
                         } else {
                             mBebopDrone.land();

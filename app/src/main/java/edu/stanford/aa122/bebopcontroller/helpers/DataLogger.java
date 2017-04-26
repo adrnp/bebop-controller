@@ -92,21 +92,6 @@ public class DataLogger implements BebopDroneListener {
                 return;
             }
 
-            // initialize the contents of the file
-            try {
-                currentFileWriter.write(COMMENT_START);
-                currentFileWriter.newLine();
-                currentFileWriter.write(COMMENT_START);
-                currentFileWriter.write("Bebop Drone Log Test");
-                currentFileWriter.newLine();
-                currentFileWriter.write(COMMENT_START);
-                currentFileWriter.newLine();
-
-            } catch (IOException e) {
-                // for whatever reason this didn't work
-                return;
-            }
-
             // if for some reason we have an existing file open, make sure to close it
             if (mFileWriter != null) {
                 try {

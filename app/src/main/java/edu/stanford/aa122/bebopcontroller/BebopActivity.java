@@ -16,10 +16,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM;
@@ -135,6 +137,9 @@ public class BebopActivity extends AppCompatActivity {
 
     // flag for whether or not settings are currently being shown
     private boolean mSettingsShowing = false;
+
+    // flag for whether or not detailed flip options are showing
+    private boolean mFlipOptionsShowing = false;
 
 
     @Override
@@ -370,6 +375,36 @@ public class BebopActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // flip button
+        final ImageButton flipForward = (ImageButton) findViewById(R.id.button_flip_forward);
+        final ImageButton flipBackward = (ImageButton) findViewById(R.id.button_flip_backward);
+        final ImageButton flipLeft = (ImageButton) findViewById(R.id.button_flip_left);
+        final ImageButton flipRight = (ImageButton) findViewById(R.id.button_flip_right);
+
+        findViewById(R.id.button_flip).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mFlipOptionsShowing) {
+                    mFlipOptionsShowing = false;
+                    flipForward.setVisibility(View.GONE);
+                    flipBackward.setVisibility(View.GONE);
+                    flipLeft.setVisibility(View.GONE);
+                    flipRight.setVisibility(View.GONE);
+                } else {
+                    mFlipOptionsShowing = true;
+                    flipForward.setVisibility(View.VISIBLE);
+                    flipBackward.setVisibility(View.VISIBLE);
+                    flipLeft.setVisibility(View.VISIBLE);
+                    flipRight.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        flipForward.setOnClickListener(mFlipListener);
+        flipBackward.setOnClickListener(mFlipListener);
+        flipLeft.setOnClickListener(mFlipListener);
+        flipRight.setOnClickListener(mFlipListener);
 
 
         /*
@@ -662,4 +697,38 @@ public class BebopActivity extends AppCompatActivity {
 
         }
     };
+
+    /** on click listener to used for all the flip buttons */
+    private View.OnClickListener mFlipListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM direction;
+
+            switch (view.getId()) {
+                case R.id.button_flip_forward:
+                    direction = ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_FRONT;
+                    break;
+
+                case R.id.button_flip_backward:
+                    direction = ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_BACK;
+                    break;
+
+                case R.id.button_flip_left:
+                    direction = ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_LEFT;
+                    break;
+
+                case R.id.button_flip_right:
+                    direction = ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_RIGHT;
+                    break;
+
+                default:
+                    return;
+            }
+
+            // execute the flip
+            mBebopDrone.flip(direction);
+        }
+    };
+
 }

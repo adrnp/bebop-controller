@@ -281,7 +281,20 @@ public class DataLogger implements BebopDroneListener {
 
     @Override
     public void onRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error) {
-        // TODO: figure out what should be logged here, if anything
+        synchronized (mFileLock) {
+            if (mFileWriter == null) {
+                return;
+            }
+
+            String newLine = String.format(Locale.US, "CMD:%d,%f,%f,%f,%f,%d", timestamp.getTime(), dx, dy, dz, dpsi, error);
+            try {
+                mFileWriter.write(newLine);
+                mFileWriter.newLine();
+            } catch (IOException e) {
+                // TODO: remove this
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

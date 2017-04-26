@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -21,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM;
@@ -34,13 +32,11 @@ import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import java.util.Date;
 import java.util.Locale;
 
-import edu.stanford.aa122.bebopcontroller.controller.AdvancedController;
 import edu.stanford.aa122.bebopcontroller.controller.AutonomousController;
 import edu.stanford.aa122.bebopcontroller.controller.ManualController;
 import edu.stanford.aa122.bebopcontroller.drone.BebopDrone;
 import edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment;
 import edu.stanford.aa122.bebopcontroller.helpers.DataLogger;
-import edu.stanford.aa122.bebopcontroller.listener.AdvancedControllerListener;
 import edu.stanford.aa122.bebopcontroller.listener.AutonomousControllerListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.view.AttitudeHUDView;
@@ -124,7 +120,6 @@ public class BebopActivity extends AppCompatActivity {
     // state information
     private int mControlMode = MODE_MANUAL;
 
-    private AdvancedController mAdvancedController;
     private AutonomousController mAutonomousController;
 
     // whether or not the bebop has GPS
@@ -170,26 +165,6 @@ public class BebopActivity extends AppCompatActivity {
                 mMissionStateView.nextMissionState();
             }
         });
-
-        /*
-        mAdvancedController = new AdvancedController(this, mBebopDrone);
-        mAdvancedController.registerControllerListener(new AdvancedControllerListener() {
-            @Override
-            public void onWaypointIndexChanged(int wp) {
-                // TODO: update a view element to display the current waypoint
-            }
-
-            @Override
-            public void onRunningStateChanged(boolean running) {
-                // TODO: update something for this... (probably need to change mode back to manual if done)
-            }
-
-            @Override
-            public void onMissionStateUpdated() {
-                 mMissionStateView.nextMissionState();
-            }
-        });
-        */
     }
 
     @Override

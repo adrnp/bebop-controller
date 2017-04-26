@@ -76,16 +76,6 @@
             android:textColor="@android:color/white"/>
     </FrameLayout>
 
-    <Button
-        android:id="@+id/button_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="36dp"
-        android:layout_marginRight="36dp"
-        android:layout_toLeftOf="@+id/frameLayout"
-        android:layout_toStartOf="@+id/frameLayout"
-        android:text="Next"/>
-
     <FrameLayout
         android:id="@+id/frame_settings"
         android:layout_width="400dp"

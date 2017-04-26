@@ -561,7 +561,7 @@ public class BebopActivity extends AppCompatActivity {
             if (error != 0) {
                 Toast.makeText(getApplicationContext(), "move error: " + error, Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(getApplicationContext(), "move ended" + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "move ended (" + dx + ", " + dy + ", " + dz + ", " + dpsi + ")", Toast.LENGTH_SHORT).show();
             }
         }
 

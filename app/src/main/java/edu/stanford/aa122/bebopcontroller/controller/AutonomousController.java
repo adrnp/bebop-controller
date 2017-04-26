@@ -36,6 +36,7 @@ public class AutonomousController {
             public void onCommandFinished() {
                 // only call the control drone function if the mission is running
                 if (mRunning) {
+                    notifyMissionSegmentCompleted();
                     controlDrone();
                 }
             }
@@ -128,43 +129,38 @@ public class AutonomousController {
             return;
         }
 
+        Toast.makeText(mContext, "wp index: " + wpIndex, Toast.LENGTH_SHORT).show();
+
         // send a different command based on the current index of motion
         switch (wpIndex) {
             case 0:
                 // example: move forwards
-                notifyMissionSegmentCompleted();
                 mBebopDrone.relativeMove(10, 0, -2, 0);  // move 10 meters forward and 10 meters up
                 break;
 
             case 1:
-                // start the video and rotate
-                notifyMissionSegmentCompleted();
-                //mBebopDrone.startVideo();
-                mBebopDrone.relativeMove(0, 0, 0, 90);
+                // move backwards
+                mBebopDrone.relativeMove(-5, 0, 0, 0);
                 break;
 
             case 2:
                 // move forward 5 meters
-                notifyMissionSegmentCompleted();
-                mBebopDrone.relativeMove(1, 0, 0, 20);
+                mBebopDrone.relativeMove(1, 0, 0, 0);
                 break;
 
             case 3:
-                // stop video and rotate 180 degrees
-                notifyMissionSegmentCompleted();
-                //mBebopDrone.stopVideo();
+                // start the video and rotate
+                //mBebopDrone.startVideo();
                 mBebopDrone.relativeMove(0, 0, 0, 90);
                 break;
 
             case 4:
                 // take a picture
-                notifyMissionSegmentCompleted();
                 mBebopDrone.takePicture();
                 break;
 
             case 5:
                 // example: land
-                notifyMissionSegmentCompleted();
                 mBebopDrone.land();
                 break;
 

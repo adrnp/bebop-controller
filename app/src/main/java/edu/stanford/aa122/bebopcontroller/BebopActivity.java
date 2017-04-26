@@ -483,10 +483,12 @@ public class BebopActivity extends AppCompatActivity {
         switch (controlMode) {
             case MODE_AUTONOMOUS:
                 // switch to autonomous control mode and hide manual controls
+                /*
                 if (!mHaveGps) {
                     Toast.makeText(mContext, "Bebop does not have GPS, cannot enter Autonomous Mode!", Toast.LENGTH_LONG).show();
                     return;
                 }
+                */
 
                 // change to auto
                 mControlMode = MODE_AUTONOMOUS;

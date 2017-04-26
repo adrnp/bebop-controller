@@ -34,7 +34,10 @@ public class AutonomousController {
         mBebopDrone.addMissionListener(new BebopDroneMissionListener() {
             @Override
             public void onCommandFinished() {
-                controlDrone();
+                // only call the control drone function if the mission is running
+                if (mRunning) {
+                    controlDrone();
+                }
             }
         });
     }
@@ -113,10 +116,6 @@ public class AutonomousController {
      * handles the autonomous control of the Bebop Drone.
      */
     private void controlDrone() {
-        // if mission is not running, return
-        if (!mRunning) {
-            return;
-        }
 
         // TODO: write your control code here
 
@@ -140,24 +139,30 @@ public class AutonomousController {
             case 1:
                 // start the video and rotate
                 notifyMissionSegmentCompleted();
-                mBebopDrone.startVideo();
-                mBebopDrone.relativeMove(0, 0, 0, 180);
+                //mBebopDrone.startVideo();
+                mBebopDrone.relativeMove(0, 0, 0, 90);
                 break;
 
             case 2:
                 // move forward 5 meters
                 notifyMissionSegmentCompleted();
-                mBebopDrone.relativeMove(5, 0, 0, 0);
+                mBebopDrone.relativeMove(1, 0, 0, 20);
                 break;
 
             case 3:
                 // stop video and rotate 180 degrees
                 notifyMissionSegmentCompleted();
-                mBebopDrone.stopVideo();
-                mBebopDrone.relativeMove(0, 0, 0, 180);
+                //mBebopDrone.stopVideo();
+                mBebopDrone.relativeMove(0, 0, 0, 90);
                 break;
 
             case 4:
+                // take a picture
+                notifyMissionSegmentCompleted();
+                mBebopDrone.takePicture();
+                break;
+
+            case 5:
                 // example: land
                 notifyMissionSegmentCompleted();
                 mBebopDrone.land();

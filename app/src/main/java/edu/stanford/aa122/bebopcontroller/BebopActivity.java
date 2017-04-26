@@ -526,6 +526,11 @@ public class BebopActivity extends AppCompatActivity {
                 viewMissionInfo.setVisibility(View.GONE);
                 viewManualControl.setVisibility(View.VISIBLE);
                 tvMode.setText(R.string.mode_manual);
+
+                // stop the mission
+                // if the mission is in progress, this should immediately stop the bebop
+                mAutonomousController.stopMission();
+
                 break;
         }
     }
@@ -547,10 +552,12 @@ public class BebopActivity extends AppCompatActivity {
                 case ARCONTROLLER_DEVICE_STATE_STOPPED:
                     Toast.makeText(mContext, "drone connection now stopped", Toast.LENGTH_SHORT).show();
 
+                    /*
                     if (!mStarted) {
                         break;
                     }
                     mStarted = false;
+                    */
 
                     // if the deviceController is stopped, go back to the previous activity
                     mConnectionProgressDialog.dismiss();

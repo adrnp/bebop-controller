@@ -66,6 +66,12 @@ public class AutonomousController {
      */
     public void stopMission() {
         mRunning = false;
+
+        // make sure the bebop stops moving!
+        if (!mBebopDrone.isLanded()) {
+            mBebopDrone.relativeMove(0, 0, 0, 0);
+        }
+
     }
 
     /**
@@ -128,17 +134,52 @@ public class AutonomousController {
                 // example: move forwards
                 notifyMissionSegmentCompleted();
                 Toast.makeText(mContext, "Moving Forward!", Toast.LENGTH_LONG).show();
-                mBebopDrone.relativeMove(5, 0, -2, 0);  // move 10 meters forward and 10 meters up
+                mBebopDrone.relativeMove(10, 0, -2, 0);  // move 10 meters forward and 10 meters up
                 break;
 
             case 1:
-                // example: move backwards
+                // start the video
                 notifyMissionSegmentCompleted();
-                Toast.makeText(mContext, "Moving Backward!", Toast.LENGTH_LONG).show();
-                mBebopDrone.relativeMove(-2, 0, 0, 0); // move 10 meters backwards
+                Toast.makeText(mContext, "Starting Video!", Toast.LENGTH_LONG).show();
+                mBebopDrone.startVideo();
                 break;
 
             case 2:
+                // rotate 180 degrees
+                notifyMissionSegmentCompleted();
+                Toast.makeText(mContext, "Rotating", Toast.LENGTH_LONG).show();
+                mBebopDrone.relativeMove(0, 0, 0, 180);
+                break;
+
+            case 3:
+                // move forward 5 meters
+                notifyMissionSegmentCompleted();
+                Toast.makeText(mContext, "Moving Forward", Toast.LENGTH_LONG).show();
+                mBebopDrone.relativeMove(5, 0, 0, 0);
+                break;
+
+            case 4:
+                // stop video
+                notifyMissionSegmentCompleted();
+                Toast.makeText(mContext, "Stopping video", Toast.LENGTH_LONG).show();
+                mBebopDrone.stopVideo();
+                break;
+
+            case 5:
+                // rotate 180 degrees
+                notifyMissionSegmentCompleted();
+                Toast.makeText(mContext, "Rotating", Toast.LENGTH_LONG).show();
+                mBebopDrone.relativeMove(0, 0, 0, 180);
+                break;
+
+            case 6:
+                // move backward 5 meters
+                notifyMissionSegmentCompleted();
+                Toast.makeText(mContext, "Moving Backward", Toast.LENGTH_LONG).show();
+                mBebopDrone.relativeMove(-5, 0, 0, 0);
+                break;
+
+            case 7:
                 // example: land
                 notifyMissionSegmentCompleted();
                 Toast.makeText(mContext, "Landing!", Toast.LENGTH_LONG).show();

@@ -83,12 +83,12 @@ public class MissionStateView extends View {
         mArcBasePaint.setColor(Color.parseColor("#88FFFFFF"));
 
         mArcProgressPaint = new Paint(strokePaint);
-        mArcProgressPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        mArcProgressPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorAccentTransparent));
 
         mVideoPaint = new Paint();
         mVideoPaint.setAntiAlias(true);
         mVideoPaint.setStyle(Paint.Style.FILL);
-        mVideoPaint.setColor(Color.RED);
+        mVideoPaint.setColor(ContextCompat.getColor(getContext(), R.color.recording_transparent));
     }
 
     @Override

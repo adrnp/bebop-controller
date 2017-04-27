@@ -17,4 +17,7 @@
     <color name="unselected_tab_color">#CCCCCC</color>
 
     <color name="dark_background_transparent">#88000000</color>
+
+    <color name="colorAccentTransparent">#885dcffc</color>
+    <color name="recording_transparent">#88d64646</color>
 </resources>

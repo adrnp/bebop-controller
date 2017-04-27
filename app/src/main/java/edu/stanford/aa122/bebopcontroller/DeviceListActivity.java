@@ -93,7 +93,7 @@ public class DeviceListActivity extends AppCompatActivity {
                     */
 
                     default:
-                        Log.e(TAG, "The type " + product + " is not supported by this sample");
+                        Log.e(TAG, "The type " + product + " is not supported by this app");
                 }
 
                 if (intent != null) {

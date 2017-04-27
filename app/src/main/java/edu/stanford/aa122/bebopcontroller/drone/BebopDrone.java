@@ -79,9 +79,6 @@ public class BebopDrone {
     /** handler */
     private final Handler mHandler;
 
-    /** the context of the activity */
-    private Context mContext;
-
     /* Parrot stuff */
     private ARDeviceController mDeviceController;
     private SDCardModule mSDCardModule;
@@ -90,7 +87,6 @@ public class BebopDrone {
     private ARCONTROLLER_DEVICE_STATE_ENUM mState;
 
     /** current run id */
-    // TODO: figure out what this is
     private String mCurrentRunId;
 
     /* current vehicle information */
@@ -124,7 +120,6 @@ public class BebopDrone {
 
     public BebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
 
-        mContext = context;
         mSettings = PreferenceManager.getDefaultSharedPreferences(context);
 
         mListeners = new ArrayList<>();

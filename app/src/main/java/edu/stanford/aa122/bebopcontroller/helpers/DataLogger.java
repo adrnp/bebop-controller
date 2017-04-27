@@ -37,8 +37,6 @@ public class DataLogger implements BebopDroneListener {
 
     /** helpful constants */
     private static final String FILE_PREFIX = "bebop";
-    private static final String COMMENT_START = "# ";
-    private static final char RECORD_DELIMITER = ',';
 
     /** context of the calling activity */
     private Context mContext;
@@ -80,7 +78,6 @@ public class DataLogger implements BebopDroneListener {
             }
 
             // name, create, and open the file
-            // TODO: figure out the desired naming scheme for my files
             SimpleDateFormat formatter = new SimpleDateFormat("yyy_MM_dd_HH_mm_ss", Locale.US);
             Date now = new Date();
             String fileName = String.format("%s_log_%s.txt", FILE_PREFIX, formatter.format(now));
@@ -166,8 +163,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }
@@ -184,8 +180,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }
@@ -202,8 +197,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
 
@@ -222,8 +216,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
 
@@ -242,8 +235,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }
@@ -260,8 +252,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }
@@ -278,8 +269,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }
@@ -296,8 +286,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }
@@ -314,8 +303,7 @@ public class DataLogger implements BebopDroneListener {
                 mFileWriter.write(newLine);
                 mFileWriter.newLine();
             } catch (IOException e) {
-                // TODO: remove this
-                e.printStackTrace();
+                // nothing to do, will just miss this entry
             }
         }
     }

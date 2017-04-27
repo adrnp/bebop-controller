@@ -69,8 +69,14 @@ public class BebopActivity extends AppCompatActivity {
     /** DEBUG tag */
     private static final String TAG = "BebopActivity";
 
+    //
     // control modes
+    //
+
+    /** user is in manual control */
     private static final int MODE_MANUAL = 0;
+
+    /** user is using autonomous control */
     private static final int MODE_AUTONOMOUS = 1;
 
     /** conversion from meters to feet */
@@ -88,7 +94,9 @@ public class BebopActivity extends AppCompatActivity {
     private ProgressDialog mConnectionProgressDialog;
     private ProgressDialog mDownloadProgressDialog;
 
+    //
     // layout view elements
+    //
 
     /** view that displays the video from the Bebop */
     private BebopVideoView mVideoView;
@@ -133,23 +141,35 @@ public class BebopActivity extends AppCompatActivity {
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
 
+    //
     // state information
+    //
+
+    /** the current control mode the device is in (mainly contributes to which screen is seen by the user */
     private int mControlMode = MODE_MANUAL;
 
-    private ManualController mManualController;
-    private AutonomousController mAutonomousController;
-
-    // whether or not the bebop has GPS
+    /** flag for Bebop's GPS status */
     private boolean mHaveGps = false;
+
+    /** flag for whether or not settings are currently being shown */
+    private boolean mSettingsShowing = false;
+
+    /** flag for whether or not detailed flip options are showing */
+    private boolean mFlipOptionsShowing = false;
 
     // XXX: testing
     private boolean mStarted = false;
 
-    // flag for whether or not settings are currently being shown
-    private boolean mSettingsShowing = false;
+    //
+    // controllers
+    //
 
-    // flag for whether or not detailed flip options are showing
-    private boolean mFlipOptionsShowing = false;
+    /** the manual controller - responsible for sending manual controls to the Bebop */
+    private ManualController mManualController;
+
+    /** the autonomous controller - responsible for sending autonomous commands to the Bebop */
+    private AutonomousController mAutonomousController;
+
 
 
     @Override
@@ -256,11 +276,10 @@ public class BebopActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Toast.makeText(mContext, "stopping", Toast.LENGTH_SHORT).show();
         if (mBebopDrone != null) {
             mBebopDrone.disconnect();
-            mBebopDrone.dispose();
-            mBebopDrone = null;
+            //mBebopDrone.dispose();
+            //mBebopDrone = null;
         }
         mDataLogger.stopLogging();
         super.onStop();
@@ -269,9 +288,9 @@ public class BebopActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         if (mBebopDrone != null) {
-            mBebopDrone.disconnect();
-            mBebopDrone.dispose();
-            mBebopDrone = null;
+            //mBebopDrone.disconnect();
+            //mBebopDrone.dispose();
+            //mBebopDrone = null;
         }
         super.onDestroy();
     }
@@ -513,28 +532,16 @@ public class BebopActivity extends AppCompatActivity {
             switch (state)
             {
                 case ARCONTROLLER_DEVICE_STATE_RUNNING:
-                    Toast.makeText(mContext, "drone connection now running", Toast.LENGTH_SHORT).show();
-                    mStarted = true;
-
                     mConnectionProgressDialog.dismiss();
                     break;
 
                 case ARCONTROLLER_DEVICE_STATE_STOPPED:
-                    Toast.makeText(mContext, "drone connection now stopped", Toast.LENGTH_SHORT).show();
-
-                    /*
-                    if (!mStarted) {
-                        break;
-                    }
-                    mStarted = false;
-                    */
-
                     // if the deviceController is stopped, go back to the previous activity
                     mConnectionProgressDialog.dismiss();
 
                     // dispose of the drone properly
-                    mBebopDrone.dispose();
-                    mBebopDrone = null;
+                    //mBebopDrone.dispose();
+                    //mBebopDrone = null;
 
                     finish();
                     break;
@@ -615,16 +622,10 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onRelativeMoveEnded(Date timestamp, float dx, float dy, float dz, float dpsi, int error) {
-            if (error != 0) {
-                Toast.makeText(getApplicationContext(), "move error: " + error, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "move ended (" + dx + ", " + dy + ", " + dz + ", " + dpsi + ")", Toast.LENGTH_SHORT).show();
-            }
         }
 
         @Override
         public void onPictureTaken(Date timestamp, ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
-            Log.i(TAG, "Picture has been taken");
         }
 
         @Override

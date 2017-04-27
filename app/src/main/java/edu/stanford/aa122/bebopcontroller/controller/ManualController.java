@@ -1,8 +1,5 @@
 package edu.stanford.aa122.bebopcontroller.controller;
 
-import android.content.Context;
-import android.preference.PreferenceManager;
-import android.view.MotionEvent;
 import android.view.View;
 
 import edu.stanford.aa122.bebopcontroller.R;
@@ -69,15 +66,26 @@ public class ManualController {
         });
     }
 
-
+    /**
+     * Set the maximum throttle control for the joystick.
+     * @param percentage  percentage of max throttle to command with full joystick motion
+     */
     public void setMaxThrottle(int percentage) {
         mLeftJoystick.setJoystickMaxYControl(percentage);
     }
 
+    /**
+     * Set the maximum rotation control for the joystick.
+     * @param percentage  percentage of max rotation speed to command with full joystick motion
+     */
     public void setMaxRotation(int percentage) {
         mLeftJoystick.setJoystickMaxXControl(percentage);
     }
 
+    /**
+     * Set the maximum roll/pitch control for the joystick.
+     * @param percentage percentage of max tilt to command with full joystick motion
+     */
     public void setMaxTilt(int percentage) {
         mRightJoystick.setJoystickMaxYControl(percentage);
         mRightJoystick.setJoystickMaxXControl(percentage);

@@ -5,11 +5,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,8 +25,6 @@ import android.widget.Toast;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
-import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_ERROR_ENUM;
-import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDSTATE_VIDEOSTATECHANGEDV2_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDSTATE_VIDEOSTATECHANGEDV2_STATE_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
@@ -47,8 +47,17 @@ import edu.stanford.aa122.bebopcontroller.view.AttitudeHUDView;
 import edu.stanford.aa122.bebopcontroller.view.BebopVideoView;
 import edu.stanford.aa122.bebopcontroller.view.MissionStateView;
 
-import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_START;
-import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_VIDEOEVENTCHANGED_EVENT_STOP;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_BANKED_TURN;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_HULL;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_JOYSTICK_MAX_ROTATION;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_JOYSTICK_MAX_THROTTLE;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_JOYSTICK_MAX_TILT;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_MAX_ALTITUDE;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_MAX_DISTANCE;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_MAX_ROTATION_SPEED;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_MAX_TILT;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_MAX_TILT_SPEED;
+import static edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment.KEY_MAX_VERTICAL_SPEED;
 
 /**
  * Main activity that handles the video display and interaction with the Bebop drone.
@@ -127,6 +136,7 @@ public class BebopActivity extends AppCompatActivity {
     // state information
     private int mControlMode = MODE_MANUAL;
 
+    private ManualController mManualController;
     private AutonomousController mAutonomousController;
 
     // whether or not the bebop has GPS
@@ -166,7 +176,14 @@ public class BebopActivity extends AppCompatActivity {
 
         // the possible controllers - create all of them here
         // they won't ever be used at the same time, so should be ok to create them all here
-        ManualController manualController = new ManualController(mBebopDrone, findViewById(R.id.include_manual_control));
+        mManualController = new ManualController(mBebopDrone, findViewById(R.id.include_manual_control));
+
+        // configure the controller appropriately
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mManualController.setMaxThrottle(prefs.getInt(KEY_JOYSTICK_MAX_THROTTLE, 50));
+        mManualController.setMaxRotation(prefs.getInt(KEY_JOYSTICK_MAX_ROTATION, 50));
+        mManualController.setMaxTilt(prefs.getInt(KEY_JOYSTICK_MAX_TILT, 50));
+
 
         mAutonomousController = new AutonomousController(this, mBebopDrone);
         mAutonomousController.registerListener(new AutonomousControllerListener() {
@@ -183,6 +200,7 @@ public class BebopActivity extends AppCompatActivity {
 
         // stop listening for the position
         mLocationManager.removeUpdates(mLocationListener);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
     @Override
@@ -193,6 +211,8 @@ public class BebopActivity extends AppCompatActivity {
         if (!(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
         }
+
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
     @Override
@@ -371,7 +391,9 @@ public class BebopActivity extends AppCompatActivity {
                 } else {
                     // show the settings
                     mSettingsShowing = true;
-                    getFragmentManager().beginTransaction().add(R.id.frame_settings, new BebopPreferenceFragment()).commit();
+                    BebopPreferenceFragment prefs = new BebopPreferenceFragment();
+                    getFragmentManager().beginTransaction().add(R.id.frame_settings, prefs).commit();
+                    findViewById(R.id.frame_settings).setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -728,6 +750,65 @@ public class BebopActivity extends AppCompatActivity {
 
             // execute the flip
             mBebopDrone.flip(direction);
+        }
+    };
+
+    /** listener to know when settings are changed */
+    private SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            // make sure this is not null before continuing
+            if (mBebopDrone == null) {
+                return;
+            }
+
+            switch (key) {
+                case KEY_HULL:
+                    mBebopDrone.setHullPresence(sharedPreferences.getBoolean(KEY_HULL, false));
+                    break;
+
+                case KEY_BANKED_TURN:
+                    mBebopDrone.setBankedTurn(sharedPreferences.getBoolean(KEY_BANKED_TURN, false));
+                    break;
+
+                case KEY_MAX_ALTITUDE:
+                    mBebopDrone.setMaxAltitude(sharedPreferences.getInt(KEY_MAX_ALTITUDE, 10));
+                    break;
+
+                case KEY_MAX_DISTANCE:
+                    mBebopDrone.setMaxDistance(sharedPreferences.getInt(KEY_MAX_DISTANCE, 100));
+                    break;
+
+                case KEY_MAX_TILT:
+                    mBebopDrone.setMaxTilt(sharedPreferences.getInt(KEY_MAX_TILT, 15));
+                    break;
+
+                case KEY_MAX_TILT_SPEED:
+                    mBebopDrone.setMaxTiltSpeed(sharedPreferences.getInt(KEY_MAX_TILT_SPEED, 80));
+                    break;
+
+                case KEY_MAX_VERTICAL_SPEED:
+                    mBebopDrone.setMaxVerticalSpeed(sharedPreferences.getInt(KEY_MAX_VERTICAL_SPEED, 10)/10.0f);
+                    mBebopDrone.setAutonomousMaxVerticalSpeed(sharedPreferences.getInt(KEY_MAX_VERTICAL_SPEED, 10)/10.0f);
+                    break;
+
+                case KEY_MAX_ROTATION_SPEED:
+                    mBebopDrone.setMaxRotationSpeed(sharedPreferences.getInt(KEY_MAX_ROTATION_SPEED, 100));
+                    mBebopDrone.setAutonomousMaxRotationSpeed(sharedPreferences.getInt(KEY_MAX_ROTATION_SPEED, 100));
+                    break;
+
+                case KEY_JOYSTICK_MAX_TILT:
+                    mManualController.setMaxTilt(sharedPreferences.getInt(KEY_JOYSTICK_MAX_TILT, 50));
+                    break;
+
+                case KEY_JOYSTICK_MAX_ROTATION:
+                    mManualController.setMaxRotation(sharedPreferences.getInt(KEY_JOYSTICK_MAX_ROTATION, 50));
+                    break;
+
+                case KEY_JOYSTICK_MAX_THROTTLE:
+                    mManualController.setMaxThrottle(sharedPreferences.getInt(KEY_JOYSTICK_MAX_THROTTLE, 50));
+                    break;
+            }
         }
     };
 

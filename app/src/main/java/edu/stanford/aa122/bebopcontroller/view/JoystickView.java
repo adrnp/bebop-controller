@@ -38,7 +38,8 @@ public class JoystickView extends View implements Runnable {
     private long mLoopInterval = DEFAULT_LOOP_INTERVAL;
 
     /** maximum control value */
-    private int mMaxControl = DEFAULT_MAX_CONTROL;
+    private int mMaxXControl = DEFAULT_MAX_CONTROL;
+    private int mMaxYControl = DEFAULT_MAX_CONTROL;
 
     /** joystick deadband */
     private int mDeadband = DEFAULT_DEADBAND;
@@ -161,11 +162,19 @@ public class JoystickView extends View implements Runnable {
     }
 
     /**
-     * set the max control for user control
+     * set the max x axis control for user control
      * @param maxControl integer max desired control (between 0 and 100)
      */
-    public void setJoystickMaxControl(int maxControl) {
-        mMaxControl = maxControl;
+    public void setJoystickMaxXControl(int maxControl) {
+        mMaxXControl = maxControl;
+    }
+
+    /**
+     * set the max y axis control for user control
+     * @param maxControl integer max desired control (between 0 and 100)
+     */
+    public void setJoystickMaxYControl(int maxControl) {
+        mMaxYControl = maxControl;
     }
 
     /**
@@ -187,7 +196,6 @@ public class JoystickView extends View implements Runnable {
         mButton = new Paint(Paint.ANTI_ALIAS_FLAG);
         mButton.setColor(Color.parseColor("#AAFFFFFF"));
         mButton.setStyle(Paint.Style.FILL);
-
     }
 
     @Override
@@ -294,7 +302,7 @@ public class JoystickView extends View implements Runnable {
         }
 
         // return the control based on the travel between the deadband and max travel
-        return (int) (mMaxControl*(travel - deadbandTravel)/(mJoystickRadius - deadbandTravel));
+        return (int) (mMaxXControl*(travel - deadbandTravel)/(mJoystickRadius - deadbandTravel));
     }
 
     /**
@@ -319,7 +327,7 @@ public class JoystickView extends View implements Runnable {
         }
 
         // return the control based on the travel between the deadband and max travel
-        return (int) (mMaxControl*(travel - deadbandTravel)/(mJoystickRadius - deadbandTravel));
+        return (int) (mMaxYControl*(travel - deadbandTravel)/(mJoystickRadius - deadbandTravel));
     }
 
     /**

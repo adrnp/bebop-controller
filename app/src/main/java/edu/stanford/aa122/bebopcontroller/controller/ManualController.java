@@ -1,6 +1,7 @@
 package edu.stanford.aa122.bebopcontroller.controller;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -21,6 +22,11 @@ public class ManualController {
     /** the drone to control */
     private BebopDrone mBebopDrone;
 
+    /** throttle/yaw joystick */
+    private JoystickView mLeftJoystick;
+
+    /** roll/pitch joystick */
+    private JoystickView mRightJoystick;
 
     /**
      * Constructor for manual controller for the Bebop Drone
@@ -38,8 +44,8 @@ public class ManualController {
      * Setup the view elements.
      */
     private void setupView() {
-        JoystickView leftJoystick = (JoystickView) mView.findViewById(R.id.joystick_left);
-        leftJoystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
+        mLeftJoystick = (JoystickView) mView.findViewById(R.id.joystick_left);
+        mLeftJoystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onControlChanged(int x, int y) {
                 mBebopDrone.setGaz((byte) -y);
@@ -47,8 +53,8 @@ public class ManualController {
             }
         });
 
-        JoystickView rightJoystick = (JoystickView) mView.findViewById(R.id.joystick_right);
-        rightJoystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
+        mRightJoystick = (JoystickView) mView.findViewById(R.id.joystick_right);
+        mRightJoystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onControlChanged(int x, int y) {
                 // need to tell the drone to listen to roll pitch commands (if present)
@@ -61,6 +67,20 @@ public class ManualController {
                 mBebopDrone.setRoll((byte) x);
             }
         });
+    }
+
+
+    public void setMaxThrottle(int percentage) {
+        mLeftJoystick.setJoystickMaxYControl(percentage);
+    }
+
+    public void setMaxRotation(int percentage) {
+        mLeftJoystick.setJoystickMaxXControl(percentage);
+    }
+
+    public void setMaxTilt(int percentage) {
+        mRightJoystick.setJoystickMaxYControl(percentage);
+        mRightJoystick.setJoystickMaxXControl(percentage);
     }
 
 }

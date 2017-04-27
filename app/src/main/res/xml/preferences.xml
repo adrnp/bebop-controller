@@ -6,58 +6,80 @@
         android:title="@string/pref_category_bebop">
 
         <CheckBoxPreference
-            android:title="Safety Enclosure"
+            android:title="Safety Hull"
             android:key="pref_bebop_cage"
             android:defaultValue="false"/>
 
+        <CheckBoxPreference
+            android:title="Banked Turn"
+            android:key="pref_bebop_banked_turn"
+            android:defaultValue="false"/>
+
+        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
+            app:title="Max Altitude"
+            android:key="pref_bebop_max_alt"
+            app:details="maximum altitude (0 - 150 m)"
+            app:max="150"
+            android:defaultValue="10"/>
+
+        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
+            app:title="Max Distance"
+            android:key="pref_bebop_max_dist"
+            app:details="maximum distance (0 - 500 m)"
+            app:max="500"
+            android:defaultValue="100"/>
+
+        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
+            app:title="Max Tilt"
+            android:key="pref_bebop_max_tilt"
+            app:details="maximum roll/pitch angle (0 - 30 deg)"
+            app:max="30"
+            android:defaultValue="15"/>
+
+        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
+            app:title="Max Tilt Speed"
+            android:key="pref_bebop_max_tilt_speed"
+            app:details="maximum roll/pitch angle rate (0 - 300 deg/sec)"
+            app:max="300"
+            android:defaultValue="80"/>
+
+        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
+            app:title="Max Vertical Speed"
+            android:key="pref_bebop_max_vert_speed"
+            app:details="maximum vertical speed (0 - 2.5 m/s)"
+            app:max="25"
+            android:defaultValue="10"/>
+
+        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
+            app:title="Max Rotation Speed"
+            android:key="pref_bebop_max_rot_speed"
+            app:details="maximum rotation speed (0 - 200 deg/sec)"
+            app:max="200"
+            android:defaultValue="100"/>
+
     </PreferenceCategory>
-    <PreferenceCategory
-        android:title="Bebop Autonomous">
 
-        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
-            app:title="Max Horizontal Velocity"
-            android:key="pref_bebop_auto_max_h_vel"
-            app:details="maximum allowable horizontal velocity"
-            app:max="100"
-            android:defaultValue="50"/>
-
-        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
-            app:title="Max Vertical Velocity"
-            android:key="pref_bebop_auto_max_v_vel"
-            app:details="maximum allowable vertical velocity"
-            app:max="100"
-            android:defaultValue="50"/>
-
-        <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
-            app:title="Max Yaw Rate"
-            android:key="pref_bebop_auto_max_yaw"
-            app:details="maximum allowable yaw rate"
-            app:max="100"
-            android:defaultValue="50"/>
-
-
-    </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/pref_category_joystick">
 
         <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
             app:title="Max Pitch/Roll"
             android:key="pref_joystick_max_pitch"
-            app:details="maximum percentage of pitch/roll commandable (0 - 100)"
+            app:details="maximum percentage of tilt commandable (0 - 100)"
             app:max="100"
             android:defaultValue="50"/>
 
         <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
             app:title="Max Yaw Rate"
             android:key="pref_joystick_max_yaw"
-            app:details="maximum percentage of yaw rate commandable (0 - 100)"
+            app:details="maximum percentage of rotation speed commandable (0 - 100)"
             app:max="100"
             android:defaultValue="50"/>
 
         <edu.stanford.aa122.bebopcontroller.view.SeekBarPreference
             app:title="Max Throttle"
             android:key="pref_joystick_max_throttle"
-            app:details="maximum percentage of throttle commandable (0 - 100)"
+            app:details="maximum percentage of vertical speed commandable (0 - 100)"
             app:max="100"
             android:defaultValue="50"/>
 

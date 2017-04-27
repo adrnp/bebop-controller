@@ -1,10 +1,13 @@
 package edu.stanford.aa122.bebopcontroller.drone;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_ANIMATIONS_FLIP_DIRECTION_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
@@ -45,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.stanford.aa122.bebopcontroller.fragment.BebopPreferenceFragment;
 import edu.stanford.aa122.bebopcontroller.helpers.AttitudeVector;
 import edu.stanford.aa122.bebopcontroller.helpers.VelocityVector;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
@@ -76,6 +80,9 @@ public class BebopDrone {
 
     /** handler */
     private final Handler mHandler;
+
+    /** the context of the activity */
+    private Context mContext;
 
     /* Parrot stuff */
     private ARDeviceController mDeviceController;
@@ -111,7 +118,13 @@ public class BebopDrone {
     /** whether or not the bebop is currently recording video */
     private boolean mVideoRecording = false;
 
+    /** the preferences that contain the settings for the drone */
+    private SharedPreferences mSettings;
+
     public BebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
+
+        mContext = context;
+        mSettings = PreferenceManager.getDefaultSharedPreferences(context);
 
         mListeners = new ArrayList<>();
         mMissionListeners = new ArrayList<>();
@@ -421,6 +434,72 @@ public class BebopDrone {
     public void setFlag(byte flag) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().setPilotingPCMDFlag(flag);
+        }
+    }
+
+    public void setMaxTilt(int tilt) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsMaxTilt(tilt);
+        }
+    }
+
+    public void setMaxTiltSpeed(int tiltSpeed) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendSpeedSettingsMaxPitchRollRotationSpeed(tiltSpeed);
+        }
+    }
+
+    public void setHullPresence(boolean present) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendSpeedSettingsHullProtection(present ? ((byte)1) : ((byte)0));
+        }
+    }
+
+    public void setBankedTurn(boolean banked) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsBankedTurn(banked ? ((byte)1) : ((byte)0));
+        }
+    }
+
+    public void setMaxDistance(int distance) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsMaxDistance(distance);
+        }
+    }
+
+    public void setMaxAltitude(int altitude) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsMaxAltitude(altitude);
+        }
+    }
+
+    public void setMaxVerticalSpeed(float speed) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendSpeedSettingsMaxVerticalSpeed(speed);
+        }
+    }
+
+    public void setMaxRotationSpeed(int speed) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendSpeedSettingsMaxRotationSpeed(speed);
+        }
+    }
+
+    public void setAutonomousMaxHorizontalSpeed(float speed) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsSetAutonomousFlightMaxHorizontalSpeed(speed);
+        }
+    }
+
+    public void setAutonomousMaxVerticalSpeed(float speed) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsSetAutonomousFlightMaxVerticalSpeed(speed);
+        }
+    }
+
+    public void setAutonomousMaxRotationSpeed(float speed) {
+        if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
+            mDeviceController.getFeatureARDrone3().sendPilotingSettingsSetAutonomousFlightMaxRotationSpeed(speed);
         }
     }
 
@@ -783,8 +862,6 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            // TODO: notify relative move changed
-
                             notifyRelativeMoveEnded(now, dX, dY, dZ, dPsi, relativeMoveError.getValue());
 
                             // mark as having just finished a command
@@ -824,6 +901,168 @@ public class BebopDrone {
                         }
                     });
 
+                    break;
+
+                /* max tilt */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXTILTCHANGED:
+                    final float currentTilt = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXTILTCHANGED_CURRENT)).doubleValue();
+                    final float minTilt = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXTILTCHANGED_MIN)).doubleValue();
+                    final float maxTilt = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXTILTCHANGED_MAX)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putInt(BebopPreferenceFragment.KEY_MAX_TILT, (int) currentTilt).apply();
+                        }
+                    });
+
+                    break;
+
+                /* max tilt speed */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXPITCHROLLROTATIONSPEEDCHANGED:
+                    final float currentTiltRate = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXPITCHROLLROTATIONSPEEDCHANGED_CURRENT)).doubleValue();
+                    float minTiltRate = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXPITCHROLLROTATIONSPEEDCHANGED_MIN)).doubleValue();
+                    final float maxTiltRate = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXPITCHROLLROTATIONSPEEDCHANGED_MAX)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putInt(BebopPreferenceFragment.KEY_MAX_TILT_SPEED, (int) currentTiltRate).apply();
+                        }
+                    });
+
+                    break;
+
+                /* max altitude */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXALTITUDECHANGED:
+                    final float currentAlt = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXALTITUDECHANGED_CURRENT)).doubleValue();
+                    float minAlt = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXALTITUDECHANGED_MIN)).doubleValue();
+                    final float maxAlt = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXALTITUDECHANGED_MAX)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putInt(BebopPreferenceFragment.KEY_MAX_ALTITUDE, (int) currentAlt).apply();
+                        }
+                    });
+
+                    break;
+
+                /* max distance */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXDISTANCECHANGED:
+
+                    final float currentDist = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXDISTANCECHANGED_CURRENT)).doubleValue();
+                    float minDist = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXDISTANCECHANGED_MIN)).doubleValue();
+                    final float maxDist = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXDISTANCECHANGED_MAX)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putInt(BebopPreferenceFragment.KEY_MAX_DISTANCE, (int) currentDist).apply();
+                        }
+                    });
+
+                    break;
+
+                /* max vertical speed */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXVERTICALSPEEDCHANGED:
+
+                    final float currentVert = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXVERTICALSPEEDCHANGED_CURRENT)).doubleValue();
+                    float minVert = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXVERTICALSPEEDCHANGED_MIN)).doubleValue();
+                    final float maxVert = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXVERTICALSPEEDCHANGED_MAX)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putInt(BebopPreferenceFragment.KEY_MAX_VERTICAL_SPEED, (int) (currentVert*10)).apply();
+                        }
+                    });
+
+                    break;
+
+                /* max rotation speed */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXROTATIONSPEEDCHANGED:
+
+                    final float currentRot = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXROTATIONSPEEDCHANGED_CURRENT)).doubleValue();
+                    final float minRot = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXROTATIONSPEEDCHANGED_MIN)).doubleValue();
+                    final float maxRot = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXROTATIONSPEEDCHANGED_MAX)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putInt(BebopPreferenceFragment.KEY_MAX_ROTATION_SPEED, (int) currentRot).apply();
+                        }
+                    });
+
+                    break;
+
+                /* auto max vh */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXHORIZONTALSPEED:
+
+                    final float maxAutoVH = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXHORIZONTALSPEED_VALUE)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(mContext, "current auto vh possible: " + maxAutoVH, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    break;
+
+                /* auto max vv */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXVERTICALSPEED:
+
+                    final float maxAutoVV = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXVERTICALSPEED_VALUE)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(mContext, "current auto vv possible: " + maxAutoVV, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    break;
+
+                /* auto max ah */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXHORIZONTALACCELERATION:
+
+                    final float maxAutoAH = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXHORIZONTALACCELERATION_VALUE)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(mContext, "current auto ah possible: " + maxAutoAH, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    break;
+
+                /* auto max av */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXVERTICALACCELERATION:
+
+                    final float maxAutoAV = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXVERTICALACCELERATION_VALUE)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(mContext, "current auto av possible: " + maxAutoAV, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    break;
+
+                /* auto max rotation rate */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXROTATIONSPEED:
+
+                    final float maxAutoRot = (float)((Double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_AUTONOMOUSFLIGHTMAXROTATIONSPEED_VALUE)).doubleValue();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(mContext, "current auto rot possible: " + maxAutoRot, Toast.LENGTH_SHORT).show();
+                        }
+                    });
                     break;
 
                 /* run id */

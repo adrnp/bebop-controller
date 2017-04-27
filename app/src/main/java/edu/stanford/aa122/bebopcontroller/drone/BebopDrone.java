@@ -54,12 +54,6 @@ import edu.stanford.aa122.bebopcontroller.helpers.VelocityVector;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneMissionListener;
 
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_BANKEDTURNCHANGED;
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXTILTCHANGED;
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_HULLPROTECTIONCHANGED;
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXPITCHROLLROTATIONSPEEDCHANGED;
-import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED;
-
 
 /**
  * Helper class for handling the interaction with the Bebop Drone.
@@ -106,6 +100,9 @@ public class BebopDrone {
 
     /** current Bebop position */
     private Location mPosition;
+
+    /** current altitude above the ground (as measured by sonar?) */
+    private float mHeight = 0;
 
     /** current Bebop velocity */
     private VelocityVector mVelocity;
@@ -275,6 +272,14 @@ public class BebopDrone {
      */
     public Location getPosition() {
         return mPosition;
+    }
+
+    /**
+     * Get the height above the ground of the drone [m]
+     * @return height in meters
+     */
+    public float getHeight() {
+        return mHeight;
     }
 
     /**
@@ -849,6 +854,7 @@ public class BebopDrone {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mHeight = (float) relativeAltitude;
                             notifyRelativeAltitudeChanged(now, relativeAltitude);
                         }
                     });

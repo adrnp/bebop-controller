@@ -54,6 +54,10 @@ import edu.stanford.aa122.bebopcontroller.helpers.VelocityVector;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneListener;
 import edu.stanford.aa122.bebopcontroller.listener.BebopDroneMissionListener;
 
+import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_BANKEDTURNCHANGED;
+import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_MAXTILTCHANGED;
+import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_HULLPROTECTIONCHANGED;
+import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_MAXPITCHROLLROTATIONSPEEDCHANGED;
 import static com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED;
 
 
@@ -901,6 +905,28 @@ public class BebopDrone {
                         }
                     });
 
+                    break;
+
+                /* banked turn mode */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_BANKEDTURNCHANGED:
+                    final byte bankedState = (byte)((Integer)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSETTINGSSTATE_BANKEDTURNCHANGED_STATE)).intValue();
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putBoolean(BebopPreferenceFragment.KEY_BANKED_TURN, bankedState == 1).apply();
+                        }
+                    });
+                    break;
+
+                /* hull present */
+                case ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_HULLPROTECTIONCHANGED:
+                    final byte hullPresent = (byte)((Integer)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_SPEEDSETTINGSSTATE_HULLPROTECTIONCHANGED_PRESENT)).intValue();
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettings.edit().putBoolean(BebopPreferenceFragment.KEY_HULL, hullPresent == 1).apply();
+                        }
+                    });
                     break;
 
                 /* max tilt */

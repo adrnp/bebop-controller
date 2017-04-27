@@ -30,7 +30,8 @@
         android:layout_height="wrap_content"
         android:text="Button"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/primary_text_dark"/>
 
     <ImageButton
         android:id="@+id/button_emergency"

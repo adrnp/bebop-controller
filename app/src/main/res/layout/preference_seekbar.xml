@@ -14,7 +14,8 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:textSize="18sp"
-        android:text="Title"/>
+        android:text="Title"
+        android:textColor="@color/primary_text"/>
 
     <TextView
         android:id="@+id/text_preference_seekbar_detail"
@@ -25,7 +26,8 @@
         android:layout_below="@+id/text_preference_seekbar_title"
         android:layout_marginTop="5dp"
         android:textSize="12sp"
-        android:text="details"/>
+        android:text="details"
+        android:textColor="@color/primary_text"/>
 
     <SeekBar
         android:id="@+id/seekbar"

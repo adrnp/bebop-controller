@@ -79,7 +79,7 @@
     <FrameLayout
         android:id="@+id/frame_settings"
         android:layout_width="400dp"
-        android:layout_height="280dp"
+        android:layout_height="350dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:background="@color/dark_background_transparent"

@@ -134,24 +134,28 @@ public class AutonomousController {
         // send a different command based on the current index of motion
         switch (wpIndex) {
             case 0:
-                // example: move forwards
-                mBebopDrone.relativeMove(10, 0, -2, 0);  // move 10 meters forward and 10 meters up
+                // move forwards and up
+                // see documentation for input details
+                // (shortcut: place cursor in 'relativeMove' and press ctrl + space)
+                mBebopDrone.relativeMove(10, 0, -2, 0);  // 10m forward, 2 meters up
                 break;
 
             case 1:
                 // move backwards
-                mBebopDrone.relativeMove(-5, 0, 0, 0);
+                mBebopDrone.relativeMove(-5, 0, 0, 0);  // 5m backwards
                 break;
 
             case 2:
-                // move forward 5 meters
-                mBebopDrone.relativeMove(1, 0, 0, 0);
+                // move forwards
+                mBebopDrone.relativeMove(1, 0, 0, 0);  // 1m forward
                 break;
 
             case 3:
-                // start the video and rotate
+                // start the video
                 //mBebopDrone.startVideo();
-                mBebopDrone.relativeMove(0, 0, 0, 90);
+
+                // rotate
+                mBebopDrone.relativeMove(0, 0, 0, 90);  // rotate 90 deg
                 break;
 
             case 4:
@@ -160,7 +164,7 @@ public class AutonomousController {
                 break;
 
             case 5:
-                // example: land
+                // land
                 mBebopDrone.land();
                 break;
 

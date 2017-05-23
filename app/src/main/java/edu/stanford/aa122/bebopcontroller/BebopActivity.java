@@ -508,6 +508,13 @@ public class BebopActivity extends AppCompatActivity {
                 viewManualControl.setVisibility(View.GONE);
                 viewMissionInfo.setVisibility(View.VISIBLE);
                 tvMode.setText(R.string.mode_auto);
+
+                // update button text accordingly
+                if (mBebopDrone.isLanded()) {
+                    btnAction.setText(R.string.mission_start);
+                } else {
+                    btnAction.setText(R.string.mission_stop);
+                }
                 break;
 
             case MODE_MANUAL:
@@ -520,6 +527,13 @@ public class BebopActivity extends AppCompatActivity {
                 // stop the mission
                 // if the mission is in progress, this should immediately stop the bebop
                 mAutonomousController.stopMission();
+
+                // update the button text accordingly
+                if (mBebopDrone.isLanded()) {
+                    btnAction.setText(R.string.takeoff);
+                } else {
+                    btnAction.setText(R.string.land);
+                }
 
                 break;
         }
@@ -561,13 +575,21 @@ public class BebopActivity extends AppCompatActivity {
         public void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
             switch (state) {
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
-                    btnAction.setText(R.string.takeoff);
+                    if (mControlMode == MODE_AUTONOMOUS) {
+                        btnAction.setText(R.string.mission_start);
+                    } else {
+                        btnAction.setText(R.string.takeoff);
+                    }
                     btnAction.setEnabled(true);
                     //mDownloadBt.setEnabled(true);
                     break;
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
-                    btnAction.setText(R.string.land);
+                    if (mControlMode == MODE_AUTONOMOUS) {
+                        btnAction.setText(R.string.mission_stop);
+                    } else {
+                        btnAction.setText(R.string.land);
+                    }
                     btnAction.setEnabled(true);
                     //mDownloadBt.setEnabled(false);
                     break;

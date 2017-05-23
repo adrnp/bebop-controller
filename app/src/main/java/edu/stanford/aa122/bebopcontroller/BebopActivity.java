@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -328,7 +329,7 @@ public class BebopActivity extends AppCompatActivity {
         findViewById(R.id.button_emergency).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // show a dialog to confirm actually wanting to e stop
-                AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(BebopActivity.this, R.style.AppCompatAlertDialogStyle));
                 builder.setMessage("this will immediately cut off the motors!")
                         .setTitle("Are You Sure?")
                         .setPositiveButton("Terminate", new DialogInterface.OnClickListener() {

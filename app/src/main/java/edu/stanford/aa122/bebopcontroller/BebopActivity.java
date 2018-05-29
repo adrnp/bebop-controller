@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -328,7 +329,7 @@ public class BebopActivity extends AppCompatActivity {
         findViewById(R.id.button_emergency).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // show a dialog to confirm actually wanting to e stop
-                AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(BebopActivity.this, R.style.AppCompatAlertDialogStyle));
                 builder.setMessage("this will immediately cut off the motors!")
                         .setTitle("Are You Sure?")
                         .setPositiveButton("Terminate", new DialogInterface.OnClickListener() {
@@ -507,6 +508,13 @@ public class BebopActivity extends AppCompatActivity {
                 viewManualControl.setVisibility(View.GONE);
                 viewMissionInfo.setVisibility(View.VISIBLE);
                 tvMode.setText(R.string.mode_auto);
+
+                // update button text accordingly
+                if (mBebopDrone.isLanded()) {
+                    btnAction.setText(R.string.mission_start);
+                } else {
+                    btnAction.setText(R.string.mission_stop);
+                }
                 break;
 
             case MODE_MANUAL:
@@ -519,6 +527,13 @@ public class BebopActivity extends AppCompatActivity {
                 // stop the mission
                 // if the mission is in progress, this should immediately stop the bebop
                 mAutonomousController.stopMission();
+
+                // update the button text accordingly
+                if (mBebopDrone.isLanded()) {
+                    btnAction.setText(R.string.takeoff);
+                } else {
+                    btnAction.setText(R.string.land);
+                }
 
                 break;
         }
@@ -560,13 +575,21 @@ public class BebopActivity extends AppCompatActivity {
         public void onPilotingStateChanged(Date timestamp, ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
             switch (state) {
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
-                    btnAction.setText(R.string.takeoff);
+                    if (mControlMode == MODE_AUTONOMOUS) {
+                        btnAction.setText(R.string.mission_start);
+                    } else {
+                        btnAction.setText(R.string.takeoff);
+                    }
                     btnAction.setEnabled(true);
                     //mDownloadBt.setEnabled(true);
                     break;
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
-                    btnAction.setText(R.string.land);
+                    if (mControlMode == MODE_AUTONOMOUS) {
+                        btnAction.setText(R.string.mission_stop);
+                    } else {
+                        btnAction.setText(R.string.land);
+                    }
                     btnAction.setEnabled(true);
                     //mDownloadBt.setEnabled(false);
                     break;

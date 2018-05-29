@@ -137,17 +137,17 @@ public class AutonomousController {
                 // move forwards and up
                 // see documentation for input details
                 // (shortcut: place cursor in 'relativeMove' and press ctrl + space)
-                mBebopDrone.relativeMove(1, 0, -2, 0);  // 10m forward, 2 meters up
+                mBebopDrone.relativeMove(1, 0, -1, 0);  // 1m forward, 1 meters up
                 break;
 
             case 1:
-                // move backwards
-                mBebopDrone.relativeMove(-0.5f, 0, 0, 0);  // 5m backwards
+                // move left
+                mBebopDrone.relativeMove(0, -1, 0, 0);  // 1m left
                 break;
 
             case 2:
-                // move forwards
-                mBebopDrone.relativeMove(1, 0, 0, 0);  // 1m forward
+                // move backwards
+                mBebopDrone.relativeMove(-1, 0, 0, 0);  // 1m backwards
                 break;
 
             case 3:
